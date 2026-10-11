@@ -2,16 +2,24 @@
   "name": "gntrees-docs-viewer",
   "type": "module",
   "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "astro": "^6.1.9"
+    "viewer:build": "bun run --filter @gntrees/docs-viewer build",
+    "viewer:dev": "bun run --filter @gntrees/docs-viewer dev",
+    "viewer:typecheck": "bun run --filter @gntrees/docs-viewer typecheck",
+    "viewer:test": "bun run --filter @gntrees/docs-viewer test",
+    "web:dev": "bun run --filter web dev",
+    "web:build": "bun run --filter web build",
+    "web:typecheck": "bun run --filter web typecheck",
+    "web:preview": "bun run --filter web preview",
+    "web:deploy": "sh apps/web/scripts/deploy-gh-pages.sh",
+    "example:serve": "bunx --bun serve ."
   }
 }

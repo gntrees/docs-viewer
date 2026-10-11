@@ -1,43 +1,52 @@
-# Astro Starter Kit: Minimal
+# gntrees-docs-viewer
+
+Monorepo for a framework-agnostic document viewer.
+
+```
+apps/
+  web/                Plain Vite site — home page + docs + live demo
+packages/
+  docs-viewer/        @gntrees/docs-viewer — the library (Web Component)
+examples/
+  html/               Minimal plain-HTML, URL-driven example
+```
+
+## The library: `@gntrees/docs-viewer`
+
+A Web Component (`<gnt-docs-viewer>`) with wrappers for React, Vue and Solid, and
+a `standalone` entry that renders from URL query parameters. See
+[`packages/docs-viewer/README.md`](packages/docs-viewer/README.md) for the full
+API, configuration and renderer docs.
+
+Quick taste:
+
+```html
+<script type="module">
+  import "@gntrees/docs-viewer";
+</script>
+<gnt-docs-viewer source="/report.pdf" engine="iframe"></gnt-docs-viewer>
+```
+
+Or straight from a URL:
+
+```
+/examples/html/?file=/report.pdf&engine=google-docs-viewer
+```
+
+## Commands
 
 ```sh
-bun create astro@latest -- --template minimal
+bun install
+
+bun run viewer:build      # build the library to packages/docs-viewer/dist
+bun run viewer:dev        # rebuild the library on change
+bun run viewer:typecheck  # tsc --noEmit
+bun run viewer:test       # vitest
+
+bun run web:dev           # run the Vite site (home + /docs)
+bun run web:build         # build the site to apps/web/dist
+bun run example:serve     # serve the repo root for the plain-HTML example
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+The Vite site aliases the library to its TypeScript source, so `web:dev` works
+without building the library first.

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash of the wrong theme.
+      try {
+        var t = localStorage.getItem("gnt-docs-viewer-theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/src/style.css" />
+    <title>Gntrees Docs Viewer</title>
+    <meta
+      name="description"
+      content="A framework-agnostic document viewer: PDF, Office, images and code, from plain HTML, React, Vue, Solid or a URL."
+    />
+  </head>
+  <body>
+    <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
+      ◐
+    </button>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Gntrees</p>
+        <h1>Docs Viewer</h1>
+        <p class="lead">View PDF, Office, images and code in any framework — or straight from a URL.</p>
+        <div class="cta">
+          <a class="btn" href="./docs/">Read the docs</a>
+          <a class="btn ghost" href="#playground">Playground</a>
+        </div>
+        <pre class="install"><code>bun add @gntrees/docs-viewer</code></pre>
+      </section>
+
+      <section id="playground">
+        <h2>Playground</h2>
+
+        <div class="demo-controls">
+          <div class="field">
+            <label for="demo-type">Type</label>
+            <select id="demo-type"></select>
+          </div>
+          <div class="field" id="demo-lang-field" hidden>
+            <label for="demo-lang">Language</label>
+            <select id="demo-lang"></select>
+          </div>
+          <div class="field">
+            <label for="demo-sample">Sample</label>
+            <select id="demo-sample"></select>
+          </div>
+          <div class="field">
+            <label for="demo-engine">Engine</label>
+            <select id="demo-engine"></select>
+          </div>
+        </div>
+
+        <p class="demo-note" id="demo-shiki-note" hidden>
+          Language lists a curated subset of Shiki's 200+ supported languages — see the
+          <a href="https://shiki.style/languages" target="_blank" rel="noopener">full language list</a>
+          and the <a href="https://shiki.style" target="_blank" rel="noopener">Shiki docs</a>. To highlight
+          any other language, set <code>code.lang</code> in the advanced config below.
+        </p>
+
+        <div class="demo-frame" id="playground-host"></div>
+        <p class="demo-hint" id="playground-hint"></p>
+
+        <div class="playground-row">
+          <label for="demo-url">File URL</label>
+          <input id="demo-url" type="text" placeholder="https://…" spellcheck="false" />
+        </div>
+        <div class="playground-toggle">
+          <label class="checkbox" for="demo-advanced-toggle">
+            <input type="checkbox" id="demo-advanced-toggle" />
+            <span>Advanced settings — use config</span>
+          </label>
+        </div>
+        <div class="playground-row">
+          <span class="playground-row-label">Preview link</span>
+          <code id="playground-link"></code>
+          <button class="btn ghost" type="button" id="playground-open">Open in new page</button>
+          <button class="btn ghost" type="button" id="playground-copy">Copy</button>
+        </div>
+
+        <details class="demo-advanced" id="demo-advanced" hidden>
+          <summary>Advanced config (JSON) — every field</summary>
+          <textarea id="demo-config" spellcheck="false" aria-label="Viewer config JSON"></textarea>
+          <div class="row">
+            <button class="btn" type="button" id="demo-config-apply">Apply config</button>
+            <span class="error" id="demo-config-error"></span>
+          </div>
+        </details>
+
+        <div class="playground-row">
+          <label for="playground-code-lang">Framework</label>
+          <select id="playground-code-lang"></select>
+        </div>
+        <div class="code-block" id="playground-code"></div>
+      </section>
+
+      <section class="why">
+        <h2>Why</h2>
+        <ul class="why-list">
+          <li>
+            <strong>Framework-agnostic.</strong> A vanilla TypeScript core; the React, Vue and
+            Solid wrappers are optional peers.
+          </li>
+          <li>
+            <strong>URL-first.</strong> One <code>?file=…</code> query parameter renders a document —
+            no application code.
+          </li>
+          <li>
+            <strong>Broad coverage.</strong> PDF, Office, images, video and code, with automatic
+            fallback between engines.
+          </li>
+          <li>
+            <strong>Lean by default.</strong> No UI dependencies; the heavy engines load only when a
+            document needs them.
+          </li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer>
+      <p>MIT licensed. Built as a Web Component with a vanilla TypeScript core.</p>
+    </footer>
+
+    <script type="module" src="/src/home.ts"></script>
+  </body>
+</html>

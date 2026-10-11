@@ -1,0 +1,81 @@
+{
+  "name": "@gntrees/docs-viewer",
+  "version": "0.1.0",
+  "description": "Framework-agnostic document viewer as a Web Component (plain JS, React, Vue, Solid).",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/standalone.js"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.js"
+    },
+    "./solid": {
+      "types": "./dist/solid.d.ts",
+      "import": "./dist/solid.js"
+    },
+    "./standalone": {
+      "types": "./dist/standalone.d.ts",
+      "import": "./dist/standalone.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "solid-js": ">=1.8",
+    "vue": ">=3.3"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "solid-js": "^1.9.0",
+    "typescript": "^5.6.0",
+    "vite": "^7.0.0",
+    "vite-plugin-dts": "^4.3.0",
+    "vue": "^3.5.0"
+  },
+  "dependencies": {
+    "@panzoom/panzoom": "^4.6.2",
+    "shiki": "^4.5.0"
+  }
+}

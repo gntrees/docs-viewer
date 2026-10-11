@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>gntrees docs viewer — standalone</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+      }
+      .hint {
+        padding: 16px;
+        color: #52525b;
+      }
+      code {
+        background: #f4f4f5;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-gnt-viewer style="height: 100%"></div>
+
+    <p class="hint" id="hint" hidden>
+      Add a query parameter, e.g. <code>?file=/path/to/report.pdf</code> or
+      <code>?file=https://example.com/report.pdf&amp;engine=google-docs-viewer</code>
+    </p>
+
+    <script type="module">
+      // Build first: `bun run --filter @gntrees/docs-viewer build`
+      import "/packages/docs-viewer/dist/standalone.js";
+
+      const params = new URLSearchParams(location.search);
+      if (!params.has("file") && !params.has("url") && !params.has("config")) {
+        document.getElementById("hint").hidden = false;
+      }
+    </script>
+  </body>
+</html>
