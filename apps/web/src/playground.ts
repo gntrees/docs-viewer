@@ -44,6 +44,7 @@ const ENGINES_BY_TYPE: Record<string, string[]> = {
   audio: ["native"],
   text: ["shiki", "google-docs-viewer"],
   table: ["table", "shiki", "google-docs-viewer"],
+  markup: ["markup", "shiki", "google-docs-viewer"],
   font: ["font", "google-docs-viewer"],
   archive: ["archive", "google-docs-viewer"],
   [CODE_KEY]: ["shiki", "google-docs-viewer"],
@@ -57,6 +58,7 @@ const ENGINE_LABELS: Record<string, string> = {
   native: "native — plain <img>",
   shiki: "shiki — code highlight",
   table: "table — CSV/TSV grid",
+  markup: "markup — HTML / Markdown",
   font: "font — specimen",
   archive: "archive — ZIP/RAR/TAR listing",
   hls: "hls — HLS.js streaming",
@@ -288,12 +290,8 @@ const TYPES: TypeGroup[] = [
         url: "https://raw.githubusercontent.com/django/django/main/tests/requirements/py3.txt",
       },
       {
-        label: "Vitest README.md",
-        url: "https://raw.githubusercontent.com/vitest-dev/vitest/main/README.md",
-      },
-      {
-        label: "type-fest package.json",
-        url: "https://raw.githubusercontent.com/sindresorhus/type-fest/main/package.json",
+        label: "express package.json",
+        url: "https://raw.githubusercontent.com/expressjs/express/master/package.json",
       },
     ],
   },
@@ -320,6 +318,32 @@ const TYPES: TypeGroup[] = [
       {
         label: "Earthquakes CSV (heavy, ~23k rows)",
         url: "https://raw.githubusercontent.com/plotly/datasets/master/earthquakes-23k.csv",
+      },
+    ],
+  },
+  {
+    key: "markup",
+    label: "Markup (HTML / Markdown)",
+    samples: [
+      {
+        label: "markup-demo.md (headings, table, code, task list)",
+        url: "https://raw.githubusercontent.com/gntrees/docs-viewer/gh-pages/samples/markup-demo.md",
+      },
+      {
+        label: "markup-demo.html (self-contained page)",
+        url: "https://raw.githubusercontent.com/gntrees/docs-viewer/gh-pages/samples/markup-demo.html",
+      },
+      {
+        label: "MDN beginner-html-site (index.html)",
+        url: "https://raw.githubusercontent.com/mdn/beginner-html-site/gh-pages/index.html",
+      },
+      {
+        label: "TypeScript README.md",
+        url: "https://raw.githubusercontent.com/microsoft/TypeScript/main/README.md",
+      },
+      {
+        label: "github/gitignore README.md",
+        url: "https://raw.githubusercontent.com/github/gitignore/main/README.md",
       },
     ],
   },
@@ -452,8 +476,8 @@ const CODE_LANGS: CodeLang[] = [
     label: "HTML",
     samples: [
       {
-        label: "mdn beginner-html-site",
-        url: "https://raw.githubusercontent.com/mdn/beginner-html-site/gh-pages/index.html",
+        label: "HTML5 Boilerplate index.html",
+        url: "https://raw.githubusercontent.com/h5bp/html5-boilerplate/main/dist/index.html",
       },
     ],
   },
@@ -622,6 +646,7 @@ const FULL_DEFAULTS = {
   code: { theme: null, lang: null },
   image: { fullscreen: true },
   video: { controls: true, autoplay: false, muted: false, loop: false, poster: null, info: true },
+  markup: { sandbox: true, baseUrl: null, gfm: true },
 };
 
 /**
@@ -644,6 +669,8 @@ function configBlob(state: ViewerConfig): ViewerConfig | null {
   if (image) blob.image = image;
   const video = pruneDefaults(state.video, FULL_DEFAULTS.video);
   if (video) blob.video = video;
+  const markup = pruneDefaults(state.markup, FULL_DEFAULTS.markup);
+  if (markup) blob.markup = markup;
   return Object.keys(blob).length > 0 ? blob : null;
 }
 
@@ -663,13 +690,14 @@ function fullConfig(state: ViewerConfig): Record<string, unknown> {
     theme: state.theme ?? "auto",
     loader: state.loader ?? "auto",
     credentials: state.credentials ?? "same-origin",
-    preflight: state.preflight ?? "auto",
+    preflight: state.preflight ?? true,
     name: name ? name : null,
     entry: entry ? entry : null,
     entryBase: entryBase ? entryBase : null,
     code: { ...FULL_DEFAULTS.code, ...state.code },
     image: { ...FULL_DEFAULTS.image, ...state.image },
     video: { ...FULL_DEFAULTS.video, ...state.video },
+    markup: { ...FULL_DEFAULTS.markup, ...state.markup },
   };
 }
 
@@ -962,7 +990,7 @@ export function initPlayground(host: HTMLElement): void {
     if (state.credentials && state.credentials !== "same-origin") {
       params.set("credentials", state.credentials);
     }
-    if (state.preflight !== undefined && state.preflight !== "auto") {
+    if (state.preflight !== undefined && state.preflight !== true) {
       params.set("preflight", String(state.preflight));
     }
 

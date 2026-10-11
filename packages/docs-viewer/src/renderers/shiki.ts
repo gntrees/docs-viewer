@@ -119,7 +119,7 @@ export const shikiRenderer: Renderer = {
   id: "shiki",
   engine: "shiki",
   priority: 15,
-  match: (ctx) => ctx.kind === "text" || ctx.kind === "table",
+  match: (ctx) => ctx.kind === "text" || ctx.kind === "table" || ctx.kind === "markup",
   mount(container, ctx) {
     const root = document.createElement("div");
     root.className = "gnt-dv-code";

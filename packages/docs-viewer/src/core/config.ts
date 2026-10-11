@@ -9,11 +9,12 @@ export const DEFAULT_CONFIG: ResolvedConfig = {
   loader: "auto",
   credentials: "same-origin",
   engine: "auto",
-  preflight: "auto",
+  preflight: true,
   theme: "auto",
   code: {},
   image: { fullscreen: true },
   video: { controls: true, info: true },
+  markup: { sandbox: true, gfm: true },
 };
 
 const LOADERS: readonly LoaderMode[] = ["auto", "blob", "direct"];
@@ -25,9 +26,9 @@ function toLoader(value: unknown): LoaderMode {
 }
 
 /**
- * Coerce a `preflight` value into `true`, `false` or `"auto"` (the default).
- * Accepts booleans and the strings `true`/`false`/`1`/`0`/`yes`/`no`; anything
- * else (including an empty string or `"auto"`) means "auto".
+ * Coerce a `preflight` value into `true`, `false` or `"auto"`. Accepts booleans
+ * and the strings `true`/`false`/`1`/`0`/`yes`/`no`, plus the literal `"auto"`.
+ * Anything else (including an empty string) falls back to the default (`true`).
  */
 export function toPreflight(value: unknown): boolean | "auto" {
   if (typeof value === "boolean") return value;
@@ -35,6 +36,7 @@ export function toPreflight(value: unknown): boolean | "auto" {
     const normalized = value.trim().toLowerCase();
     if (normalized === "true" || normalized === "1" || normalized === "yes") return true;
     if (normalized === "false" || normalized === "0" || normalized === "no") return false;
+    if (normalized === "auto") return "auto";
   }
   return DEFAULT_CONFIG.preflight;
 }
@@ -157,5 +159,6 @@ export function resolveConfig(
     code: { ...DEFAULT_CONFIG.code, ...(merged.code ?? {}) },
     image: { ...DEFAULT_CONFIG.image, ...(merged.image ?? {}) },
     video: { ...DEFAULT_CONFIG.video, ...(merged.video ?? {}) },
+    markup: { ...DEFAULT_CONFIG.markup, ...(merged.markup ?? {}) },
   };
 }

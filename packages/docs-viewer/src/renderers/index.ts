@@ -3,6 +3,7 @@ import { archiveRenderer } from "./archive";
 import { fontRenderer } from "./font";
 import { hlsRenderer } from "./hls";
 import { imageRenderer } from "./image";
+import { markupRenderer } from "./markup";
 import { mediaRenderer } from "./media";
 import { panzoomRenderer } from "./panzoom";
 import { pdfRenderer } from "./pdf";
@@ -15,6 +16,7 @@ export { archiveRenderer } from "./archive";
 export { fontRenderer } from "./font";
 export { hlsRenderer } from "./hls";
 export { imageRenderer } from "./image";
+export { MARKUP_MAX_CHARS, markupRenderer } from "./markup";
 export { mediaRenderer } from "./media";
 export { panzoomRenderer } from "./panzoom";
 export { pdfRenderer } from "./pdf";
@@ -49,6 +51,7 @@ export function createDefaultRegistry(): RendererRegistry {
     .register(imageRenderer)
     .register(shikiRenderer)
     .register(tableRenderer)
+    .register(markupRenderer)
     .register(fontRenderer)
     .register(archiveRenderer)
     .register(microsoftDocsViewerRenderer)

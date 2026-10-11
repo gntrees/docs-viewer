@@ -111,7 +111,23 @@ describe("detect", () => {
     // An explicit `type: "text"` lock is respected…
     expect(detect("data.csv", "text").kind).toBe("text");
     // …and a more specific mime still wins over the extension.
-    expect(detect("data.csv", undefined, "text/html").kind).toBe("text");
+    expect(detect("data.csv", undefined, "text/html").kind).toBe("markup");
+  });
+
+  it("detects HTML and Markdown as markup", () => {
+    expect(detect("page.html", undefined)).toMatchObject({ kind: "markup", ext: "html" });
+    expect(detect("readme.md", undefined)).toMatchObject({ kind: "markup", ext: "md" });
+    expect(detect("doc.mdx", undefined)).toMatchObject({ kind: "markup" });
+    // A Content-Type is authoritative.
+    expect(detect("x", undefined, "text/markdown").kind).toBe("markup");
+    expect(detect("x", undefined, "text/html").kind).toBe("markup");
+    // Raw hosts serve .md as text/plain; the extension refines it.
+    expect(detect("readme.md", undefined, "text/plain").kind).toBe("markup");
+    // Type aliases lock the markup kind…
+    expect(detect("x", "markdown").kind).toBe("markup");
+    expect(detect("x", "html").kind).toBe("markup");
+    // …but an explicit text lock is still respected.
+    expect(detect("page.html", "text").kind).toBe("text");
   });
 
   it("locks the table kind from an alias", () => {

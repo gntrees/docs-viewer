@@ -24,6 +24,7 @@ export default defineConfig({
         "@panzoom/panzoom",
         "brotli-dec-wasm",
         "hls.js",
+        "marked",
         "node-unrar-js",
         "react",
         "react-dom",

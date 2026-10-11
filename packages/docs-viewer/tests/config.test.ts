@@ -6,7 +6,7 @@ describe("resolveConfig", () => {
     const config = resolveConfig();
     expect(config.loader).toBe(DEFAULT_CONFIG.loader);
     expect(config.engine).toBe("auto");
-    expect(config.preflight).toBe("auto");
+    expect(config.preflight).toBe(true);
     expect(config.theme).toBe("auto");
     expect(config.credentials).toBe("same-origin");
     expect(config.code).toEqual({});
@@ -35,7 +35,7 @@ describe("resolveConfig", () => {
     expect(resolveConfig({ preflight: false }).preflight).toBe(false);
     expect(resolveConfig({ preflight: true }).preflight).toBe(true);
     expect(resolveConfig({ preflight: "auto" as never }).preflight).toBe("auto");
-    expect(resolveConfig({ preflight: "" as never }).preflight).toBe("auto");
+    expect(resolveConfig({ preflight: "" as never }).preflight).toBe(true);
   });
 
   it("coerces the theme setting", () => {

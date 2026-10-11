@@ -24,6 +24,7 @@ export type BuiltinEngine =
   | "panzoom"
   | "shiki"
   | "hls"
+  | "markup"
   | "microsoft-docs-viewer"
   | "google-docs-viewer";
 
@@ -40,6 +41,7 @@ export type FileKind =
   | "image"
   | "text"
   | "table"
+  | "markup"
   | "office"
   | "video"
   | "audio"
@@ -91,6 +93,30 @@ export interface VideoViewerConfig {
   info?: boolean;
 }
 
+/**
+ * Options for the markup renderer (engine `"markup"`) — HTML and Markdown.
+ *
+ * The rendered document is shown by default, with the content bar's toggle
+ * switching to the raw source (Shiki-highlighted). Untrusted markup is isolated
+ * in a sandboxed `<iframe>` so it can never run scripts or reach the host page.
+ */
+export interface MarkupViewerConfig {
+  /**
+   * Render inside a sandboxed `<iframe>` (default `true`). The frame has no
+   * `allow-scripts`/`allow-same-origin`, so scripts never run and the document
+   * cannot touch the host page. Set `false` to render inline in the viewer
+   * instead (best-effort sanitised — only for trusted sources).
+   */
+  sandbox?: boolean;
+  /**
+   * Base URL used to resolve relative links and images inside the document.
+   * Defaults to the directory of `source`.
+   */
+  baseUrl?: string;
+  /** Enable GitHub-Flavored Markdown (tables, strikethrough, …). Default `true`. */
+  gfm?: boolean;
+}
+
 /** Viewer colour theme. `auto` follows the OS/browser preference. */
 export type Theme = "auto" | "light" | "dark";
 
@@ -137,10 +163,11 @@ export interface ViewerConfig {
    * rendering proceeds. The probe also exposes the response `Content-Type`, which
    * is used for detection.
    *
-   * - `true` — always probe absolute `http(s)` URLs;
+   * - `true` (default) — always probe absolute `http(s)` URLs, so a missing file
+   *   fails fast with a clear message even when `type` is locked;
    * - `false` — never probe (detect from `type` / the extension only);
-   * - `"auto"` (default) — probe only when it can change the outcome, i.e. when
-   *   `type` is `"auto"`/unset. A known `type` is used directly, with no probe.
+   * - `"auto"` — probe only when it can change the outcome, i.e. when `type` is
+   *   `"auto"`/unset. A known `type` is used directly, with no probe.
    *
    * An explicitly configured value always wins.
    */
@@ -155,6 +182,8 @@ export interface ViewerConfig {
   image?: ImageViewerConfig;
   /** Native `video`/`audio` playback options (engine `native`). */
   video?: VideoViewerConfig;
+  /** HTML / Markdown rendering options (engine `markup`). */
+  markup?: MarkupViewerConfig;
 }
 
 /** Config after defaults have been applied. */
@@ -172,6 +201,7 @@ export interface ResolvedConfig {
   code: CodeViewerConfig;
   image: ImageViewerConfig;
   video: VideoViewerConfig;
+  markup: MarkupViewerConfig;
 }
 
 export interface DetectedFile {

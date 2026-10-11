@@ -241,7 +241,7 @@ describe("DocsViewerElement", () => {
     expect(captured?.kind).toBe("pdf");
   });
 
-  it("does not probe when an explicit type is set", async () => {
+  it("does not probe a locked type under preflight auto", async () => {
     let captured: RenderContext | undefined;
     const renderer: Renderer = {
       id: "capture",
@@ -258,7 +258,7 @@ describe("DocsViewerElement", () => {
     const element = document.createElement(TAG) as DocsViewerElement;
     element.registry = new RendererRegistry().register(renderer);
     document.body.appendChild(element);
-    element.config = { source: "https://files.test/report.bin", type: "pdf" };
+    element.config = { source: "https://files.test/report.bin", type: "pdf", preflight: "auto" };
     await flush();
 
     expect(fetchSpy).not.toHaveBeenCalled();

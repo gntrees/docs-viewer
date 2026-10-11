@@ -109,9 +109,9 @@ const IMAGE_EXTS = new Set([
   "psd", "dxf", "ai", "eps", "ps",
 ]);
 const TEXT_EXTS = new Set([
-  "txt", "md", "markdown", "mdx", "log",
+  "txt", "log",
   "json", "jsonc", "json5", "xml", "yml", "yaml", "ini", "toml", "env",
-  "html", "htm", "css", "scss", "sass", "less",
+  "css", "scss", "sass", "less",
   "js", "mjs", "cjs", "jsx", "ts", "tsx", "mts", "cts",
   "vue", "svelte",
   "py", "go", "rs", "rb", "java", "c", "h", "cpp", "cc", "cxx", "hpp",
@@ -121,6 +121,8 @@ const TEXT_EXTS = new Set([
 ]);
 /** Delimited text rendered by the `table` engine (.csv/.tsv/.tab). */
 const TABLE_EXTS = new Set(["csv", "tsv", "tab"]);
+/** Markup rendered by the `markup` engine (HTML and Markdown). */
+const MARKUP_EXTS = new Set(["html", "htm", "md", "markdown", "mdx"]);
 /** Fonts (`font` kind; a DIY specimen renderer is planned). */
 const FONT_EXTS = new Set(["ttf"]);
 /** Archives (`archive` kind; Google lists .zip/.rar, a DIY renderer is planned). */
@@ -156,6 +158,12 @@ const TYPE_ALIASES: Record<string, { kind: FileKind; mime: string }> = {
   code: { kind: "text", mime: "text/plain" },
   table: { kind: "table", mime: "text/csv" },
   csv: { kind: "table", mime: "text/csv" },
+  markup: { kind: "markup", mime: "text/html" },
+  html: { kind: "markup", mime: "text/html" },
+  htm: { kind: "markup", mime: "text/html" },
+  markdown: { kind: "markup", mime: "text/markdown" },
+  md: { kind: "markup", mime: "text/markdown" },
+  mdx: { kind: "markup", mime: "text/markdown" },
   font: { kind: "font", mime: "font/ttf" },
   archive: { kind: "archive", mime: "application/zip" },
   office: { kind: "office", mime: DOCX_MIME },
@@ -233,6 +241,9 @@ export function kindFromMime(mime: string): FileKind {
   if (mime === "application/postscript" || mime === "application/illustrator") return "image";
   if (mime === "application/vnd.ms-xpsdocument" || mime === "application/oxps") return "image";
   if (mime.startsWith("image/")) return "image";
+  if (mime === "text/html" || mime === "text/markdown" || mime === "text/x-markdown") {
+    return "markup";
+  }
   if (mime.startsWith("text/")) return "text";
   if (mime.startsWith("video/")) return "video";
   if (mime.includes("mpegurl")) return "video"; // HLS playlists (.m3u8)
@@ -259,6 +270,7 @@ export function kindFromMime(mime: string): FileKind {
 export function kindFromExt(ext: string): FileKind {
   if (ext === "pdf") return "pdf";
   if (TABLE_EXTS.has(ext)) return "table";
+  if (MARKUP_EXTS.has(ext)) return "markup";
   if (FONT_EXTS.has(ext)) return "font";
   if (ARCHIVE_EXTS.has(ext)) return "archive";
   if (IMAGE_EXTS.has(ext)) return "image";

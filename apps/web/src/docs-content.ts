@@ -155,11 +155,11 @@ export function App() {
           ["name", "string", "from URL", "Display name; its extension is a last-resort detection hint (Content-Type wins). Usually derived from the URL; override it via the advanced `?config=` blob."],
           ["entry", "string", "—", "Deep-link one member of an archive: the archive at `source` opens with its path (breadcrumb) restored to `entry`, and the member is previewed below it. `entry` is a `/`-separated path that may chain **through nested archives** (`inner.zip/doc.pdf`). Used by the archive's own open-in-new-page action. Advanced (`?config=`)."],
           ["entryBase", "string", "current page", "Absolute base URL the archive uses for its member deep-links (defaults to the current page). Advanced (`?config=`); normally unnecessary."],
-          ["type", "string", "auto", "Lock detection. Accepts a kind alias (pdf, image, video, audio, text, code, table, font, archive, office, word, excel, powerpoint), a MIME (`application/pdf`) or family (`image/*`), or a bare extension (`docx`). `auto` detects from the Content-Type; the URL extension is only a last resort. Query alias: type."],
-          ["engine", "auto | iframe | native | panzoom | shiki | hls | microsoft-docs-viewer | google-docs-viewer", "auto", "Engine preference; auto uses the recommended order with fallback. Query alias: engine."],
+          ["type", "string", "auto", "Lock detection. Accepts a kind alias (pdf, image, video, audio, text, code, table, markup, html, markdown, font, archive, office, word, excel, powerpoint), a MIME (`application/pdf`) or family (`image/*`), or a bare extension (`docx`). `auto` detects from the Content-Type; the URL extension is only a last resort. Query alias: type."],
+          ["engine", "auto | iframe | native | panzoom | shiki | hls | markup | microsoft-docs-viewer | google-docs-viewer", "auto", "Engine preference; auto uses the recommended order with fallback. Query alias: engine."],
           ["loader", "auto | direct | blob", "auto", "How bytes reach the renderer: `direct` streams the file over HTTP range requests (no CORS needed); `blob` fetches the whole file first (needs CORS). Query alias: loader."],
           ["credentials", "omit | same-origin | include", "same-origin", "Request credentials mode, used when `loader: blob`. Query alias: credentials."],
-          ["preflight", "true | false | auto", "auto", "Probe before rendering (CORS HEAD). An explicit value wins; `auto` probes only when the type needs detecting (`type` auto/unset). A locked `type` skips the probe unless you set `preflight: true`. A 404/410 fails fast. Query alias: preflight."],
+          ["preflight", "true | false | auto", "true", "Probe before rendering (CORS HEAD). `true` (default) always probes absolute `http(s)` URLs, so a missing file fails fast with a clear message even when `type` is locked. `false` never probes. `auto` probes only when the type needs detecting (`type` auto/unset). A 404/410 fails fast. Query alias: preflight."],
           ["theme", "auto | light | dark", "auto", "Viewer colour theme. `auto` follows the OS/browser preference (`prefers-color-scheme`); `light`/`dark` force it (set as `data-theme` on the host). Also honours a `theme` HTML attribute. Query alias: theme."],
           ["code.theme", "string", "github-light/dark", "Shiki theme for the shiki engine."],
           ["code.lang", "string", "from extension", "Force a Shiki language id for the shiki engine. Query alias: lang."],
@@ -170,6 +170,9 @@ export function App() {
           ["video.loop", "boolean", "false", "Loop playback."],
           ["video.poster", "string", "—", "Poster image URL (video only)."],
           ["video.info", "boolean", "true", "Show a small format/duration/seek/buffer info line over the media (native & hls engines)."],
+          ["markup.sandbox", "boolean", "true", "Render HTML/Markdown inside a sandboxed `<iframe>` (no scripts, no same-origin) so untrusted markup can never run code or reach the host page. Set `false` to render inline (best-effort sanitised — trusted sources only)."],
+          ["markup.baseUrl", "string", "source directory", "Base URL used to resolve relative links and images inside the rendered document."],
+          ["markup.gfm", "boolean", "true", "Enable GitHub-Flavored Markdown (tables, strikethrough, task lists, …)."],
         ],
       },
       {
@@ -178,7 +181,7 @@ export function App() {
       },
       {
         type: "p",
-        text: "Universal knobs live in the query string so links stay readable: `?file=/report.pdf&type=image&engine=panzoom&theme=dark&loader=blob&credentials=include&preflight=true`. Advanced keys (`name`/`entry`/`entryBase`) and the type-specific config (`code`/`image`/`video`) are emitted as a base64url `?config=` blob, and only when they differ from the defaults. Simple query params always win over the blob, and the document URL stays in `?file=` rather than being duplicated inside it.",
+        text: "Universal knobs live in the query string so links stay readable: `?file=/report.pdf&type=image&engine=panzoom&theme=dark&loader=blob&credentials=include&preflight=true`. Advanced keys (`name`/`entry`/`entryBase`) and the type-specific config (`code`/`image`/`video`/`markup`) are emitted as a base64url `?config=` blob, and only when they differ from the defaults. Simple query params always win over the blob, and the document URL stays in `?file=` rather than being duplicated inside it.",
       },
       {
         type: "p",
@@ -203,6 +206,7 @@ export function App() {
           ["video (.m3u8)", "hls.js", "HLS streaming, segment by segment (engine: hls) → native → google-docs-viewer."],
           ["text", "Shiki", "shiki (highlight) → google-docs-viewer. Fetches the bytes (needs CORS)."],
           ["table", "DIY <table>", "CSV/TSV/TAB via a built-in RFC 4180 parser (engine: table) → shiki → download. Sticky header, numeric columns right-aligned; caps at 1000 rows with a \"Load all\" button. Fetches the bytes (needs CORS). Excel stays `office`."],
+          ["markup", "DIY (rendered) + Shiki (source)", "HTML (.html/.htm) and Markdown (.md/.markdown/.mdx), engine: markup. Shows the rendered document by default (Markdown via a lazily-loaded `marked`; HTML as-is, with its own styles left untouched so it renders exactly as authored) and the content bar's toggle switches to the Shiki-highlighted source. Untrusted markup is isolated in a sandboxed `<iframe>` (markup.sandbox) so it can never run scripts or leak styles into the host page. Fetches the bytes (needs CORS). Falls back to shiki → google-docs-viewer → download."],
           ["font", "DIY specimen", "(engine: font) → google-docs-viewer → download. Renders a specimen (sample, size ladder, glyphs) via `FontFace`, and reads the real Family/Subfamily + unitsPerEm from the font tables (TTF/OTF/WOFF free; WOFF2 via a lazily-loaded Brotli decoder)."],
           ["archive", "DIY browser", "(engine: archive) → google-docs-viewer → download. A Google-Drive-style browser for ZIP (built-in parser), RAR (lazily-loaded decoder) and TAR / .tar.gz (built-in parser): the archive opens as a single file that extracts on click, then a single breadcrumb header, a filter and a sortable table. Folders and nested archives extend the same breadcrumb; opening a file renders a nested viewer **below the path**, so nothing leaves the page. A member can still be deep-linked (`?file=<archive>&entry=<path>`, which the open-in-new-page action points at the host's `/view/` route) and downloaded. Office members (docx/xlsx/pptx) cannot be previewed inline — their remote viewers need a public URL — so they offer a download instead. TAR members are stored, so only gzip is decompressed."],
           ["office", "<iframe> (remote)", "docx/xlsx/pptx/odt via Office or Google viewer."],
@@ -237,6 +241,7 @@ export function App() {
           "office → `microsoft-docs-viewer` → `google-docs-viewer` → download",
           "text → `shiki` → `google-docs-viewer` → download",
           "table → `table` → `shiki` → `google-docs-viewer` → download",
+          "markup → `markup` → `shiki` → `google-docs-viewer` → download",
           "font → `font` → `google-docs-viewer` → download",
           "archive → `archive` → `google-docs-viewer` → download",
           "video → `native` → `google-docs-viewer` → download",
@@ -310,7 +315,7 @@ export function App() {
       },
       {
         type: "p",
-        text: "**Detection limits:** a remote viewer is a cross-origin iframe, so the client cannot read its status or body — an error page still fires `load`. The available signals are a **preflight** probe (`preflight`, default `auto`: it runs when the type needs detecting, and an explicit `true`/`false` always wins) and the fallback **timeout**. Detection prefers the probe's `Content-Type`; the URL extension is only a last resort. A proxy is needed for full reliability.",
+        text: "**Detection limits:** a remote viewer is a cross-origin iframe, so the client cannot read its status or body — an error page still fires `load`. The available signals are a **preflight** probe (`preflight`, default `true`: it probes absolute URLs and an explicit `false`/`auto` always wins) and the fallback **timeout**. Detection prefers the probe's `Content-Type`; the URL extension is only a last resort. A proxy is needed for full reliability.",
       },
       {
         type: "code",

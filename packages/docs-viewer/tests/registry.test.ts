@@ -76,6 +76,16 @@ describe("default registry", () => {
     ]);
   });
 
+  it("orders the markup renderer before shiki and google", () => {
+    const registry = createDefaultRegistry();
+    expect(registry.candidates(at("markup")).map((renderer) => renderer.id)).toEqual([
+      "markup",
+      "shiki",
+      "google-docs-viewer",
+      "unsupported",
+    ]);
+  });
+
   it("routes font and archive through their DIY renderer then Google", () => {
     const registry = createDefaultRegistry();
     expect(registry.candidates(at("font")).map((renderer) => renderer.id)).toEqual([

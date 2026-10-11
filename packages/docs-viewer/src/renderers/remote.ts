@@ -29,6 +29,7 @@ const GOOGLE_KINDS: readonly FileKind[] = [
   "video",
   "text",
   "table",
+  "markup",
   "font",
   "archive",
 ];

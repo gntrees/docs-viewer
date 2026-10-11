@@ -261,9 +261,11 @@ export class DocsViewerElement extends HTMLElementBase {
 
     const isAbsolute = /^https?:/i.test(config.source);
 
-    // Preflight resolution (priority order):
-    //   1. an explicitly configured `preflight` always wins;
-    //   2. otherwise probe only when the type needs detecting (auto / unset).
+    // Preflight resolution:
+    //   - `false` never probes;
+    //   - `"auto"` probes only when the type needs detecting;
+    //   - `true` (the default) always probes absolute URLs, so a missing file
+    //     fails fast with a clear message even when `type` is locked.
     const shouldProbe =
       isAbsolute &&
       (config.preflight === true || (config.preflight === "auto" && wantsAutoDetect));

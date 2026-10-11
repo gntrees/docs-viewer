@@ -56,6 +56,7 @@ export const BASE_CSS = `
   .gnt-dv-viewport,
   .gnt-dv-code-body,
   .gnt-dv-table-body,
+  .gnt-dv-markup-body,
   .gnt-dv-font-body,
   .gnt-dv-archive-wrap {
     scrollbar-width: thin;
@@ -324,6 +325,46 @@ a.gnt-dv-bar-name:hover {
 }
 .gnt-dv-table-action:hover {
   background: rgba(255, 255, 255, 0.32);
+}
+
+/* Markup renderer (engine: "markup") — HTML and Markdown, sandboxed by default. */
+.gnt-dv-markup {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--gnt-bg, #f5f5f5);
+}
+.gnt-dv-markup-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.gnt-dv-markup-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* Opaque neutral canvas so a document with no background of its own does not
+     show the viewer's theme background through it (which made dark text
+     invisible in dark mode). */
+  background: #fff;
+}
+.gnt-dv-markup-doc {
+  padding: 24px;
+  color: var(--gnt-fg, #18181b);
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-wrap: break-word;
+}
+.gnt-dv-markup-doc img,
+.gnt-dv-markup-doc video { max-width: 100%; height: auto; }
+.gnt-dv-markup-hint {
+  margin: 16px;
+  color: var(--gnt-muted, #52525b);
+  font-size: 13px;
 }
 
 /* Panzoom image renderer (engine: "panzoom") — no vendor CSS, a flat solid
