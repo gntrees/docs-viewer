@@ -48,7 +48,20 @@ describe("remote renderers", () => {
     expect(googleDocsViewerRenderer.match(context("office"))).toBe(true);
     expect(googleDocsViewerRenderer.match(context("image"))).toBe(true);
     expect(googleDocsViewerRenderer.match(context("pdf"))).toBe(true);
+    expect(googleDocsViewerRenderer.match(context("table"))).toBe(true);
+    expect(googleDocsViewerRenderer.match(context("font"))).toBe(true);
+    expect(googleDocsViewerRenderer.match(context("archive"))).toBe(true);
     expect(googleDocsViewerRenderer.match(context("audio"))).toBe(false);
+  });
+
+  it("does not match a non-absolute source", () => {
+    const relative = {
+      ...context("office"),
+      source: "/report.docx",
+      displayUrl: "/report.docx",
+    };
+    expect(microsoftDocsViewerRenderer.match(relative)).toBe(false);
+    expect(googleDocsViewerRenderer.match(relative)).toBe(false);
   });
 
   it("orders Microsoft before Google", () => {

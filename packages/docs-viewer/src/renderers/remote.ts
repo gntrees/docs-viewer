@@ -19,9 +19,26 @@ const MICROSOFT_KINDS: readonly FileKind[] = ["office"];
 
 /**
  * Formats Google's viewer supports (images, video, text, markup, Office, PDF,
- * …). Used as a broad late fallback for content the browser cannot render.
+ * fonts, archives, …). Used as a broad late fallback for content the browser
+ * cannot render natively (e.g. PSD/DXF/AI/EPS/PS via the `image` chain).
  */
-const GOOGLE_KINDS: readonly FileKind[] = ["office", "pdf", "image", "video", "text"];
+const GOOGLE_KINDS: readonly FileKind[] = [
+  "office",
+  "pdf",
+  "image",
+  "video",
+  "text",
+  "table",
+  "font",
+  "archive",
+];
+
+const ABSOLUTE_URL = /^https?:\/\//i;
+
+/** Both remote viewers fetch the file server-side, so a relative/blob source cannot work. */
+function isAbsoluteSource(url: string | undefined): boolean {
+  return !!url && ABSOLUTE_URL.test(url);
+}
 
 /**
  * Build an iframe renderer for a remote viewer engine.
@@ -44,7 +61,8 @@ function createRemoteRenderer(options: {
     engine: options.engine,
     priority: options.priority,
     requiresPublicUrl: true,
-    match: (ctx: RenderContext) => options.kinds.includes(ctx.kind),
+    match: (ctx: RenderContext) =>
+      options.kinds.includes(ctx.kind) && isAbsoluteSource(ctx.source ?? ctx.displayUrl),
     mount(container, initialCtx) {
       let ctx = initialCtx;
       let disposed = false;

@@ -1,9 +1,11 @@
+import { extractArchiveEntry } from "./core/archive";
 import { parseQuery, resolveConfig, toPreflight } from "./core/config";
 import { detect, fileNameFromUrl, kindFromMime, normalizeContentType } from "./core/detect";
-import { loadDocument } from "./core/loader";
+import { loadDocument, type LoadedDocument } from "./core/loader";
 import { probe } from "./core/preflight";
 import { RendererRegistry } from "./core/registry";
 import { ensureStyles } from "./core/styles";
+import { TAG } from "./core/tag";
 import type {
   DetectedFile,
   RenderContext,
@@ -14,7 +16,7 @@ import type {
 } from "./core/types";
 import { createDefaultRegistry } from "./renderers";
 
-export const TAG = "gnt-docs-viewer";
+export { TAG };
 
 const OBSERVED_ATTRIBUTES = [
   "source",
@@ -24,6 +26,7 @@ const OBSERVED_ATTRIBUTES = [
   "type",
   "loader",
   "preflight",
+  "theme",
 ] as const;
 
 type Status = "loading" | "ready" | "error" | "empty";
@@ -192,6 +195,9 @@ export class DocsViewerElement extends HTMLElementBase {
     const preflight = get("preflight");
     if (preflight !== undefined) props.preflight = toPreflight(preflight);
 
+    const theme = get("theme");
+    if (theme) props.theme = theme as ViewerConfig["theme"];
+
     return props;
   }
 
@@ -202,6 +208,10 @@ export class DocsViewerElement extends HTMLElementBase {
     this.#config = config;
 
     this.classList.add("gnt-dv-host");
+
+    // `auto` follows `prefers-color-scheme`; a set theme pins `data-theme`.
+    if (config.theme !== "auto") this.setAttribute("data-theme", config.theme);
+    else this.removeAttribute("data-theme");
 
     this.dispatchEvent(new CustomEvent("gnt-config-change", { detail: config }));
     void this.#load(config);
@@ -221,12 +231,33 @@ export class DocsViewerElement extends HTMLElementBase {
 
     // Derive the display name from the source URL so detection works when only
     // `source` is provided (the common case).
-    const name = config.name ?? fileNameFromUrl(config.source);
+    let name = config.name ?? fileNameFromUrl(config.source);
 
     // An explicit `type` (MIME or extension) is authoritative; `"auto"`/unset
     // means "detect it" (from the preflight Content-Type, then the extension).
     const typeOverride = config.type && config.type !== "auto" ? config.type : undefined;
     const wantsAutoDetect = !config.type || config.type === "auto";
+
+    // `entry` previews one member of an archive. When the source *is* an archive we
+    // leave the entry to the archive renderer, so the page keeps the archive's path
+    // (breadcrumb) chrome. For any other source we extract the member and render its
+    // bytes directly (a blob), detecting by the entry name.
+    let preloaded: LoadedDocument | null = null;
+    if (config.entry && detect(name, typeOverride).kind !== "archive") {
+      const response = await fetch(config.source, { signal: this.#controller.signal });
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`.trim());
+      const { bytes, name: entryName } = await extractArchiveEntry(
+        await response.arrayBuffer(),
+        config.entry,
+      );
+      if (runId !== this.#runId) return;
+      // Carry the member's MIME type so a PDF (etc.) renders inside an iframe.
+      const objectUrl = URL.createObjectURL(
+        new Blob([bytes as BlobPart], { type: detect(entryName, undefined).mime }),
+      );
+      preloaded = { displayUrl: objectUrl, revoke: () => URL.revokeObjectURL(objectUrl) };
+      name = entryName;
+    }
 
     const isAbsolute = /^https?:/i.test(config.source);
 
@@ -241,7 +272,10 @@ export class DocsViewerElement extends HTMLElementBase {
 
     try {
       let detected: DetectedFile;
-      if (shouldProbe) {
+      if (preloaded) {
+        // An extracted entry is already bytes; detect from the entry name only.
+        detected = detect(name, typeOverride);
+      } else if (shouldProbe) {
         // A definitive 404/410 fails fast; CORS-blocked hosts report "unknown"
         // and rendering proceeds, falling back to the extension.
         const result = await probe(config.source, this.#controller.signal);
@@ -263,7 +297,7 @@ export class DocsViewerElement extends HTMLElementBase {
       // never a blob: URL. Probe the engine order and force `direct` if the winning
       // renderer requires a publicly reachable URL.
       const predicted: RenderContext = {
-        displayUrl: config.source ?? "",
+        displayUrl: preloaded?.displayUrl ?? config.source ?? "",
         source: config.source,
         name,
         mime: detected.mime,
@@ -279,7 +313,7 @@ export class DocsViewerElement extends HTMLElementBase {
         ? { ...config, loader: "direct" }
         : config;
 
-      const loaded = await loadDocument(effective, this.#controller.signal);
+      const loaded = preloaded ?? (await loadDocument(effective, this.#controller.signal));
       if (runId !== this.#runId) {
         loaded.revoke?.();
         return;
@@ -289,7 +323,7 @@ export class DocsViewerElement extends HTMLElementBase {
 
       const context: RenderContext = {
         displayUrl: loaded.displayUrl,
-        source: effective.source,
+        source: preloaded ? undefined : effective.source,
         name,
         mime: detected.mime,
         ext: detected.ext,

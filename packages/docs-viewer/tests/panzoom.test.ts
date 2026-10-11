@@ -100,6 +100,7 @@ describe("panzoomRenderer", () => {
     expect(stage).not.toBeNull();
     expect(stage?.querySelector("img")?.getAttribute("src")).toBe("https://x.test/a.png");
     expect(buttonList(container)).toHaveLength(9);
+    expect(buttonList(container)[8]!.hidden).toBe(false);
     expect(container.querySelector(".gnt-dv-panzoom-bar svg")).not.toBeNull();
     // No background-image anywhere (icons are real inline SVG).
     expect(container.querySelector("[style*='background-image']")).toBeNull();
@@ -221,6 +222,25 @@ describe("panzoomRenderer", () => {
 
     container.querySelector(".gnt-dv-panzoom-stage")!.dispatchEvent(new MouseEvent("click"));
     expect(requestFullscreen).not.toHaveBeenCalled();
+    // The toolbar's fullscreen button is hidden too, not just click-to-fullscreen.
+    expect(buttonList(container)[8]!.hidden).toBe(true);
+
+    instance.destroy();
+  });
+
+  it("toggles the fullscreen button visibility on update", async () => {
+    const container = host();
+    const instance = panzoomRenderer.mount(container, context());
+    await waitFor(() => instances.length === 1);
+
+    const fullscreenBtn = buttonList(container)[8]!;
+    expect(fullscreenBtn.hidden).toBe(false);
+
+    instance.update?.(context({ config: resolveConfig({ image: { fullscreen: false } }) }));
+    expect(fullscreenBtn.hidden).toBe(true);
+
+    instance.update?.(context({ config: resolveConfig({ image: { fullscreen: true } }) }));
+    expect(fullscreenBtn.hidden).toBe(false);
 
     instance.destroy();
   });

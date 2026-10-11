@@ -1,4 +1,5 @@
 import type { Renderer, ResolvedConfig } from "../core/types";
+import { contentBar } from "./content-bar";
 
 /**
  * Shiki-backed code renderer (`engine: "shiki"`).
@@ -82,7 +83,10 @@ export function shikiLangForExt(ext: string): string {
 export function shikiTheme(config: ResolvedConfig): string {
   if (config.code.theme) return config.code.theme;
   const dark =
-    typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches;
+    config.theme === "dark" ||
+    (config.theme !== "light" &&
+      typeof matchMedia === "function" &&
+      matchMedia("(prefers-color-scheme: dark)").matches);
   return dark ? "github-dark" : "github-light";
 }
 
@@ -105,21 +109,38 @@ function loadShiki(): Promise<ShikiModule> {
   return shikiPromise;
 }
 
+/** Highlight `code` to themed HTML with Shiki (rejects if Shiki cannot load). */
+export async function highlightCode(code: string, lang: string, theme: string): Promise<string> {
+  const shiki = await loadShiki();
+  return shiki.codeToHtml(code, { lang, theme });
+}
+
 export const shikiRenderer: Renderer = {
   id: "shiki",
   engine: "shiki",
   priority: 15,
-  match: (ctx) => ctx.kind === "text",
+  match: (ctx) => ctx.kind === "text" || ctx.kind === "table",
   mount(container, ctx) {
     const root = document.createElement("div");
     root.className = "gnt-dv-code";
+    let code: string | null = null;
+    const bar = contentBar({
+      name: ctx.name,
+      source: ctx.source ?? ctx.displayUrl,
+      getText: () => code,
+    });
+    root.appendChild(bar.root);
+    // A separate scroller keeps the bar fixed while the code scrolls.
+    const body = document.createElement("div");
+    body.className = "gnt-dv-code-body";
+    root.appendChild(body);
     container.appendChild(root);
 
     const showPlain = (text: string): void => {
       const pre = document.createElement("pre");
       pre.className = "gnt-dv-text";
       pre.textContent = text;
-      root.replaceChildren(pre);
+      body.replaceChildren(pre);
     };
     showPlain("Loading…");
 
@@ -132,17 +153,22 @@ export const shikiRenderer: Renderer = {
         if (!response.ok) {
           throw new Error(`${response.status} ${response.statusText}`.trim());
         }
-        const code = await response.text();
+        code = await response.text();
         if (disposed) return;
-
-        const shiki = await loadShiki();
-        if (disposed) return;
+        bar.refresh();
 
         const lang = ctx.config.code.lang ?? shikiLangForExt(ctx.ext);
-        const html = await shiki.codeToHtml(code, { lang, theme: shikiTheme(ctx.config) });
+        const html = await highlightCode(code, lang, shikiTheme(ctx.config));
         if (disposed) return;
 
-        root.innerHTML = html;
+        // Wrap the highlighted output in our own scroller container: host page
+        // CSS adds `overflow` to `pre`, so rather than scrolling *inside* the
+        // pre we size this wrapper to its content and let the body scroll both
+        // axes (vertical + horizontal, auto).
+        const scroll = document.createElement("div");
+        scroll.className = "gnt-dv-code-scroll";
+        scroll.innerHTML = html;
+        body.replaceChildren(scroll);
       } catch (error) {
         if (disposed) return;
         ctx.fail?.(error instanceof Error ? error : new Error(String(error)));

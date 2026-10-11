@@ -160,15 +160,26 @@ pre code {
 .icon-button:hover {
   background: var(--bg-subtle);
 }
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
 
-/* Home page has no topbar — the theme toggle floats in the top-right corner. */
-.theme-toggle {
+/* Home page has no topbar — the GitHub link and theme toggle float top-right. */
+.theme-toggle,
+.github-toggle {
   position: fixed;
   top: 16px;
-  right: 16px;
   z-index: 20;
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: blur(12px);
+}
+.theme-toggle {
+  right: 16px;
+}
+.github-toggle {
+  right: 58px;
 }
 
 /* ---- layout ---- */
@@ -418,6 +429,84 @@ p {
 .playground-row .btn {
   padding: 8px 12px;
   font-size: 13px;
+}
+
+/* Hover card — a small "i" badge that reveals a reference on hover/focus. */
+.info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+  cursor: help;
+}
+.info:hover .info-icon,
+.info:focus-visible .info-icon {
+  color: var(--fg);
+  border-color: var(--fg-muted);
+}
+.info-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: max-content;
+  max-width: min(340px, 80vw);
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--fg-muted);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+  pointer-events: none;
+}
+.info:hover .info-card,
+.info:focus-within .info-card {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.info-card strong {
+  display: block;
+  color: var(--fg);
+  font-size: 12px;
+}
+.info-card strong:not(:first-child) {
+  margin-top: 10px;
+}
+.info-card ul {
+  margin: 4px 0 0;
+  padding-left: 16px;
+}
+.info-card li {
+  margin: 1px 0;
+}
+.info-card code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg);
 }
 
 .playground-toggle {

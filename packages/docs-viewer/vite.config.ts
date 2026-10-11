@@ -22,6 +22,9 @@ export default defineConfig({
     rollupOptions: {
       external: [
         "@panzoom/panzoom",
+        "brotli-dec-wasm",
+        "hls.js",
+        "node-unrar-js",
         "react",
         "react-dom",
         "react/jsx-runtime",

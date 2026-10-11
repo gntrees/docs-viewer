@@ -18,7 +18,8 @@ import type { Renderer } from "../core/types";
  * `<img>`; since `rotate` composes outside `transform`, the mirror happens in the
  * image's own (rotated) frame, which is what a flip button should do.
  *
- * Only click-to-fullscreen is configurable (`image.fullscreen`, default `true`).
+ * Fullscreen is configurable via `image.fullscreen` (default `true`): it enables
+ * both click-to-fullscreen on the stage and the toolbar's fullscreen button.
  */
 
 /** The subset of the Panzoom API this renderer uses. */
@@ -135,6 +136,7 @@ export const panzoomRenderer: Renderer = {
     let instance: PanzoomInstance | null = null;
     let removeWheel: (() => void) | null = null;
     let fullscreenEnabled = ctx.config.image.fullscreen !== false;
+    fullscreenBtn.hidden = !fullscreenEnabled;
     let rotation = 0;
     let flipH = false;
     let flipV = false;
@@ -262,6 +264,7 @@ export const panzoomRenderer: Renderer = {
         flipV = false;
         applyTransform();
         fullscreenEnabled = next.config.image.fullscreen !== false;
+        fullscreenBtn.hidden = !fullscreenEnabled;
         wireImageClick();
         instance?.reset();
       },

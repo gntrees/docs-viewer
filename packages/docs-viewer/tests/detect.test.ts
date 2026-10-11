@@ -13,7 +13,8 @@ describe("detect", () => {
     expect(detect("report.pdf", undefined)).toMatchObject({ kind: "pdf", ext: "pdf" });
     expect(detect("pic.JPG", undefined).kind).toBe("image");
     expect(detect("notes.docx", undefined).kind).toBe("office");
-    expect(detect("data.csv", undefined).kind).toBe("text");
+    expect(detect("data.csv", undefined).kind).toBe("table");
+    expect(detect("notes.txt", undefined).kind).toBe("text");
     expect(detect("clip.mp4", undefined).kind).toBe("video");
     expect(detect("song.mp3", undefined).kind).toBe("audio");
     expect(detect("blob.xyz", undefined).kind).toBe("unknown");
@@ -49,6 +50,115 @@ describe("detect", () => {
     expect(detect(undefined, "application/pdf")).toMatchObject({ kind: "pdf", ext: "pdf" });
     expect(detect("file.bin", "docx")).toMatchObject({ kind: "office", ext: "docx" });
     expect(detect("file.bin", ".pdf")).toMatchObject({ kind: "pdf", ext: "pdf" });
+  });
+
+  it("locks a kind from a dropdown alias", () => {
+    expect(detect("file.bin", "image")).toMatchObject({ kind: "image", mime: "image/png" });
+    expect(detect("file.bin", "video")).toMatchObject({ kind: "video" });
+    expect(detect("file.bin", "audio")).toMatchObject({ kind: "audio" });
+    expect(detect("file.bin", "text")).toMatchObject({ kind: "text" });
+    expect(detect("file.bin", "code")).toMatchObject({ kind: "text" });
+    expect(detect("file.bin", "pdf")).toMatchObject({ kind: "pdf", mime: "application/pdf" });
+    // Office sub-types all resolve to the `office` kind but keep a specific MIME.
+    expect(detect("file.bin", "word")).toMatchObject({ kind: "office" });
+    expect(detect("file.bin", "excel").mime).toContain("spreadsheetml");
+    expect(detect("file.bin", "powerpoint").mime).toContain("presentationml");
+    expect(detect("file.bin", "office")).toMatchObject({ kind: "office" });
+  });
+
+  it("keeps a URL MIME that matches the locked kind", () => {
+    // `type=image` on a `.jpg` keeps image/jpeg rather than the image/png default.
+    expect(detect("photo.jpg", "image")).toMatchObject({ kind: "image", mime: "image/jpeg" });
+    // Office sub-types share the `office` kind, so a URL MIME of the same kind is
+    // kept; an unrelated URL falls back to the alias representative.
+    expect(detect("slides.pptx", "word")).toMatchObject({ kind: "office" });
+    expect(detect("slides.pptx", "word").mime).toContain("presentationml");
+    expect(detect("file.bin", "word").mime).toContain("wordprocessingml");
+    // `type=code` keeps the extension so Shiki still infers the language.
+    expect(detect("main.rs", "code")).toMatchObject({ kind: "text", ext: "rs" });
+  });
+
+  it("locks a kind from a MIME family wildcard", () => {
+    expect(detect("file.bin", "image/*")).toMatchObject({ kind: "image", mime: "image/png" });
+    expect(detect("clip.gif", "image/*")).toMatchObject({ kind: "image", mime: "image/gif" });
+    expect(detect("file.bin", "video/*")).toMatchObject({ kind: "video" });
+    expect(detect("file.bin", "audio/*")).toMatchObject({ kind: "audio" });
+    expect(detect("file.bin", "text/*")).toMatchObject({ kind: "text" });
+  });
+
+  it("lets an exact MIME override beat the URL extension", () => {
+    // A `.txt` URL locked as a PDF is treated as a PDF.
+    expect(detect("notes.txt", "application/pdf")).toMatchObject({
+      kind: "pdf",
+      mime: "application/pdf",
+    });
+  });
+
+  it("maps csv/tsv/tab to the table kind", () => {
+    expect(detect("data.csv", undefined)).toMatchObject({ kind: "table", mime: "text/csv" });
+    expect(detect("data.tsv", undefined).kind).toBe("table");
+    expect(detect("data.tab", undefined).kind).toBe("table");
+    expect(detect("file", undefined, "text/csv")).toMatchObject({ kind: "table", ext: "csv" });
+    expect(detect("file", undefined, "text/tab-separated-values").kind).toBe("table");
+  });
+
+  it("refines a generic text/plain mime with a tabular extension", () => {
+    // raw.githubusercontent serves CSV as `text/plain`; the extension refines it.
+    expect(detect("data.csv", undefined, "text/plain")).toMatchObject({
+      kind: "table",
+      ext: "csv",
+    });
+    // An explicit `type: "text"` lock is respected…
+    expect(detect("data.csv", "text").kind).toBe("text");
+    // …and a more specific mime still wins over the extension.
+    expect(detect("data.csv", undefined, "text/html").kind).toBe("text");
+  });
+
+  it("locks the table kind from an alias", () => {
+    expect(detect("file.bin", "table")).toMatchObject({ kind: "table", mime: "text/csv" });
+    expect(detect("file.bin", "csv")).toMatchObject({ kind: "table", mime: "text/csv" });
+  });
+
+  it("maps Google-only formats to their domain kinds", () => {
+    for (const [name, kind] of [
+      ["a.psd", "image"],
+      ["a.dxf", "image"],
+      ["a.ai", "image"],
+      ["a.eps", "image"],
+      ["a.ps", "image"],
+      ["a.xps", "image"],
+      ["a.ttf", "font"],
+      ["a.zip", "archive"],
+      ["a.rar", "archive"],
+      ["a.pages", "office"],
+    ] as const) {
+      expect(detect(name, undefined).kind).toBe(kind);
+    }
+  });
+
+  it("maps Google-only MIME types", () => {
+    expect(detect("file", undefined, "application/postscript").kind).toBe("image");
+    expect(detect("file", undefined, "image/vnd.adobe.photoshop").kind).toBe("image");
+    expect(detect("file", undefined, "application/vnd.ms-xpsdocument").kind).toBe("image");
+    expect(detect("file", undefined, "font/ttf").kind).toBe("font");
+    expect(detect("file", undefined, "application/zip").kind).toBe("archive");
+    expect(detect("file", undefined, "application/vnd.apple.pages").kind).toBe("office");
+  });
+
+  it("refines other generic mimes from the extension", () => {
+    // Hosts commonly serve DXF/PSD/TTF/ZIP as text/plain or octet-stream.
+    expect(detect("plan.dxf", undefined, "text/plain")).toMatchObject({ kind: "image" });
+    expect(detect("art.psd", undefined, "application/octet-stream")).toMatchObject({
+      kind: "image",
+    });
+    expect(detect("font.ttf", undefined, "application/octet-stream")).toMatchObject({
+      kind: "font",
+    });
+    expect(detect("pack.zip", undefined, "application/octet-stream")).toMatchObject({
+      kind: "archive",
+    });
+    // A deliberate text lock is still respected.
+    expect(detect("plan.dxf", "text").kind).toBe("text");
   });
 
   it("prefers an authoritative mime hint over a misleading extension", () => {

@@ -74,6 +74,7 @@ describe("shikiRenderer", () => {
     const pre = container.querySelector("pre.shiki");
     expect(pre).not.toBeNull();
     expect(pre?.innerHTML).toContain("const");
+    expect(container.querySelector(".gnt-dv-bar-name")?.textContent).toBe("a.ts");
     instance.destroy();
   });
 

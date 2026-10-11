@@ -19,7 +19,9 @@ export type {
   Renderer,
   RendererInstance,
   ResolvedConfig,
+  Theme,
   ViewerConfig,
+  VideoViewerConfig,
 } from "./core/types";
 
 export {
@@ -29,6 +31,7 @@ export {
   parseQuery,
   resolveConfig,
   toPreflight,
+  toTheme,
 } from "./core/config";
 
 export {
@@ -54,7 +57,9 @@ export {
   createDefaultRegistry,
   googleDocsViewerRenderer,
   googleViewerUrl,
+  hlsRenderer,
   imageRenderer,
+  mediaRenderer,
   microsoftDocsViewerRenderer,
   microsoftViewerUrl,
   panzoomRenderer,

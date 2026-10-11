@@ -20,9 +20,10 @@ export type LoaderMode = "auto" | "blob" | "direct";
 export type BuiltinEngine =
   | "auto"
   | "iframe"
-  | "native"
+  | "native" // native <img> / <video> / <audio>
   | "panzoom"
   | "shiki"
+  | "hls"
   | "microsoft-docs-viewer"
   | "google-docs-viewer";
 
@@ -38,9 +39,12 @@ export type FileKind =
   | "pdf"
   | "image"
   | "text"
+  | "table"
   | "office"
   | "video"
   | "audio"
+  | "font"
+  | "archive"
   | "unknown";
 
 /** Options for the Shiki code renderer (engine `"shiki"`). */
@@ -58,9 +62,37 @@ export interface CodeViewerConfig {
  * click-to-fullscreen behaviour can be turned off.
  */
 export interface ImageViewerConfig {
-  /** Click the image to open it fullscreen. Defaults to `true`. */
+  /**
+   * Enable fullscreen: click the image to open it, and show the toolbar's
+   * fullscreen button. Defaults to `true`.
+   */
   fullscreen?: boolean;
 }
+
+/** Native `video`/`audio` playback options for the `native` engine. */
+export interface VideoViewerConfig {
+  /** Show the browser's native controls. Defaults to `true`. */
+  controls?: boolean;
+  /**
+   * Start playback automatically. Browsers only allow this for muted media, so
+   * `muted` defaults to `true` whenever `autoplay` is on unless set explicitly.
+   */
+  autoplay?: boolean;
+  /** Start muted. Defaults to `true` when `autoplay` is set, otherwise `false`. */
+  muted?: boolean;
+  /** Loop playback. Defaults to `false`. */
+  loop?: boolean;
+  /** Poster image URL (video only). */
+  poster?: string;
+  /**
+   * Show a small info line with format, duration, resolution, seekability and
+   * buffered progress. Defaults to `true`.
+   */
+  info?: boolean;
+}
+
+/** Viewer colour theme. `auto` follows the OS/browser preference. */
+export type Theme = "auto" | "light" | "dark";
 
 /** Everything a consumer may pass in. All fields are optional. */
 export interface ViewerConfig {
@@ -69,16 +101,33 @@ export interface ViewerConfig {
   /** Display name / filename. Also used for extension detection and downloads. */
   name?: string;
   /**
+   * Preview one member of an archive (ZIP/RAR). When set, the viewer fetches the
+   * archive at `source` and extracts `entry` before detection/rendering. Query
+   * alias: entry.
+   */
+  entry?: string;
+  /**
+   * Absolute URL used to open archive members in a new page. Defaults to the
+   * current page — correct when the viewer *is* the page. An embedded viewer (a
+   * playground, a docs site) points it at its dedicated viewer route.
+   */
+  entryBase?: string;
+  /**
    * Force the detected type:
-   * - a MIME type (`application/pdf`) or a bare extension (`pdf`) forces that type;
+   * - a **kind alias** (`pdf`, `image`, `video`, `audio`, `text`, `code`, `table`,
+   *   `font`, `archive`, `office`, `word`, `excel`, `powerpoint`) locks the whole kind;
+   * - a **MIME type** (`application/pdf`) or **MIME family** (`image/*`) locks
+   *   that MIME / family;
+   * - a bare **extension** (`pdf`, `docx`) locks via the extension table;
    * - `"auto"` (the default when unset) detects it — from the preflight response
    *   `Content-Type` first, falling back to the URL extension.
    *
    * An extension is only trusted as a last resort, since a URL can lie.
    */
   type?: string;
+  /** How bytes reach the renderer. Query alias: loader. */
   loader?: LoaderMode;
-  /** Credentials mode used when `loader` is `blob`. */
+  /** Credentials mode used when `loader` is `blob`. Query alias: credentials. */
   credentials?: RequestCredentials;
   /** Engine preference; `"auto"` picks the recommended renderer with fallback. */
   engine?: Engine;
@@ -96,21 +145,33 @@ export interface ViewerConfig {
    * An explicitly configured value always wins.
    */
   preflight?: boolean | "auto";
+  /**
+   * Colour theme. `"auto"` (default) follows the OS/browser preference via
+   * `prefers-color-scheme`; `"light"`/`"dark"` force it. Applied as `data-theme`
+   * on the host. Query alias: theme.
+   */
+  theme?: Theme;
   code?: CodeViewerConfig;
   image?: ImageViewerConfig;
+  /** Native `video`/`audio` playback options (engine `native`). */
+  video?: VideoViewerConfig;
 }
 
 /** Config after defaults have been applied. */
 export interface ResolvedConfig {
   source?: string;
   name?: string;
+  entry?: string;
+  entryBase?: string;
   type?: string;
   loader: LoaderMode;
   credentials: RequestCredentials;
   engine: Engine;
   preflight: boolean | "auto";
+  theme: Theme;
   code: CodeViewerConfig;
   image: ImageViewerConfig;
+  video: VideoViewerConfig;
 }
 
 export interface DetectedFile {
