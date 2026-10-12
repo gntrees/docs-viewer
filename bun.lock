@@ -20,7 +20,7 @@
     },
     "packages/docs-viewer": {
       "name": "@gntrees/docs-viewer",
-      "version": "0.1.0",
+      "version": "0.0.1",
       "dependencies": {
         "@panzoom/panzoom": "^4.6.2",
         "brotli-dec-wasm": "^2.3.2",

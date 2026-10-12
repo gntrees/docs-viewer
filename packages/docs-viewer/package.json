@@ -1,6 +1,6 @@
 {
   "name": "@gntrees/docs-viewer",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Framework-agnostic document viewer as a Web Component (plain JS, React, Preact, Vue, Svelte, Solid).",
   "keywords": [
     "document-viewer",
@@ -76,6 +76,7 @@
   },
   "scripts": {
     "build": "vite build",
+    "prepack": "npm run build",
     "dev": "vite build --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
