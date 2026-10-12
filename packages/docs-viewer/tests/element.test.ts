@@ -306,6 +306,20 @@ describe("DocsViewerElement", () => {
     expect(fetchSpy).toHaveBeenCalled();
   });
 
+  it("never probes streaming media, even with preflight true", async () => {
+    const fetchSpy = vi.fn(async () => new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const element = document.createElement(TAG) as DocsViewerElement;
+    element.registry = new RendererRegistry().register(fakeRenderer());
+    document.body.appendChild(element);
+    element.config = { source: "https://files.test/song.mp3", type: "audio", preflight: true };
+    await flush();
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(element.querySelector('[data-testid="fake-renderer"]')).not.toBeNull();
+  });
+
   it("prefers the configured engine over priority", async () => {
     const order: string[] = [];
     const makeRenderer = (id: string, engine: string, priority: number): Renderer => ({

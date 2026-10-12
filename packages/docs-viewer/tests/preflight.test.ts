@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { preflight, probe } from "../src/core/preflight";
+import { preflight, probe, PROBE_TIMEOUT_MS } from "../src/core/preflight";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -29,6 +29,25 @@ describe("probe", () => {
   it("reports fail with no header for 404", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(null, { status: 404 })));
     expect(await probe("https://x.test/missing.pdf")).toEqual({ status: "fail" });
+  });
+
+  it("abandons a hanging request as unknown after the timeout", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        (_url: string, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError")),
+            );
+          }),
+      ),
+    );
+    const pending = probe("https://x.test/stall.mp3");
+    await vi.advanceTimersByTimeAsync(PROBE_TIMEOUT_MS + 10);
+    expect(await pending).toEqual({ status: "unknown" });
+    vi.useRealTimers();
   });
 });
 

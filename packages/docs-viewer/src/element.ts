@@ -261,6 +261,12 @@ export class DocsViewerElement extends HTMLElementBase {
 
     const isAbsolute = /^https?:/i.test(config.source);
 
+    // Streaming media (video/audio, incl. HLS) is played by the browser's native
+    // element, so a reachability probe only adds latency — and some media hosts
+    // stall on HEAD. Skip the probe for those kinds.
+    const guess = detect(name, typeOverride);
+    const streams = guess.kind === "video" || guess.kind === "audio";
+
     // Preflight resolution:
     //   - `false` never probes;
     //   - `"auto"` probes only when the type needs detecting;
@@ -268,6 +274,7 @@ export class DocsViewerElement extends HTMLElementBase {
     //     fails fast with a clear message even when `type` is locked.
     const shouldProbe =
       isAbsolute &&
+      !streams &&
       (config.preflight === true || (config.preflight === "auto" && wantsAutoDetect));
 
     this.#setStatus("loading");
