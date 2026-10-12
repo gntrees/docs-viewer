@@ -13,8 +13,9 @@ examples/
 
 ## The library: `@gntrees/docs-viewer`
 
-A Web Component (`<gnt-docs-viewer>`) with wrappers for React, Vue and Solid, and
-a `standalone` entry that renders from URL query parameters. See
+A Web Component (`<gnt-docs-viewer>`) with wrappers for React, Preact, Vue,
+Svelte and Solid, and a `standalone` entry that renders from URL query
+parameters. See
 [`packages/docs-viewer/README.md`](packages/docs-viewer/README.md) for the full
 API, configuration and renderer docs.
 

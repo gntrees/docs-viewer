@@ -1,9 +1,36 @@
 {
   "name": "@gntrees/docs-viewer",
   "version": "0.1.0",
-  "description": "Framework-agnostic document viewer as a Web Component (plain JS, React, Vue, Solid).",
+  "description": "Framework-agnostic document viewer as a Web Component (plain JS, React, Preact, Vue, Svelte, Solid).",
+  "keywords": [
+    "document-viewer",
+    "file-viewer",
+    "pdf",
+    "office",
+    "web-component",
+    "custom-element",
+    "react",
+    "preact",
+    "vue",
+    "svelte",
+    "solid",
+    "shiki"
+  ],
+  "homepage": "https://gntrees.github.io/docs-viewer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gntrees/docs-viewer.git",
+    "directory": "packages/docs-viewer"
+  },
+  "bugs": {
+    "url": "https://github.com/gntrees/docs-viewer/issues"
+  },
   "type": "module",
   "license": "MIT",
+  "author": {
+    "name": "gntrees",
+    "url": "https://github.com/gntrees"
+  },
   "sideEffects": [
     "./dist/index.js",
     "./dist/standalone.js"
@@ -11,6 +38,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,9 +53,17 @@
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
     },
+    "./preact": {
+      "types": "./dist/preact.d.ts",
+      "import": "./dist/preact.js"
+    },
     "./vue": {
       "types": "./dist/vue.d.ts",
       "import": "./dist/vue.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte.d.ts",
+      "import": "./dist/svelte.js"
     },
     "./solid": {
       "types": "./dist/solid.d.ts",
@@ -44,12 +82,17 @@
     "test:watch": "vitest"
   },
   "peerDependencies": {
+    "preact": ">=10.20",
     "react": ">=18",
     "react-dom": ">=18",
     "solid-js": ">=1.8",
+    "svelte": ">=4",
     "vue": ">=3.3"
   },
   "peerDependenciesMeta": {
+    "preact": {
+      "optional": true
+    },
     "react": {
       "optional": true
     },
@@ -59,6 +102,9 @@
     "solid-js": {
       "optional": true
     },
+    "svelte": {
+      "optional": true
+    },
     "vue": {
       "optional": true
     }
@@ -66,12 +112,15 @@
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "happy-dom": "^21.0.1",
+    "preact": "^10.24.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "solid-js": "^1.9.0",
     "typescript": "^5.6.0",
     "vite": "^7.0.0",
     "vite-plugin-dts": "^4.3.0",
+    "vitest": "^5.0.3",
     "vue": "^3.5.0"
   },
   "dependencies": {

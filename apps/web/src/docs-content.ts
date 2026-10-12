@@ -80,6 +80,32 @@ export function App() {
     ],
   },
   {
+    id: "preact",
+    title: "Preact",
+    description: "Use the Preact wrapper with the same props API as the React wrapper.",
+    blocks: [
+      {
+        type: "code",
+        code: `import { DocsViewer } from "@gntrees/docs-viewer/preact";
+
+export function App() {
+  return (
+    <DocsViewer
+      source="/report.pdf"
+      style={{ height: "80vh" }}
+      onReady={(ctx) => console.log("ready", ctx)}
+      onError={(err) => console.error(err)}
+    />
+  );
+}`,
+      },
+      {
+        type: "p",
+        text: "The Preact wrapper mirrors the React one: config as props, `class` for styling and `onReady` / `onError` callbacks.",
+      },
+    ],
+  },
+  {
     id: "vue",
     title: "Vue",
     description: "Use the Vue wrapper with a single config object and ready/error events.",
@@ -112,6 +138,26 @@ export function App() {
 }`,
       },
       { type: "p", text: "The Solid wrapper accepts config as props (plus `class`)." },
+    ],
+  },
+  {
+    id: "svelte",
+    title: "Svelte",
+    description: "Mount the viewer from Svelte with an action — no component compilation needed.",
+    blocks: [
+      {
+        type: "code",
+        code: `<script>
+  import { docsViewer } from "@gntrees/docs-viewer/svelte";
+  const config = { source: "/report.pdf" };
+</script>
+
+<div style="height: 80vh" use:docsViewer={{ ...config, onReady: (ctx) => console.log(ctx) }}></div>`,
+      },
+      {
+        type: "p",
+        text: "The Svelte entry exports a `docsViewer` action (`use:docsViewer`) that takes every `ViewerConfig` field plus `onReady` / `onError`.",
+      },
     ],
   },
   {
@@ -399,7 +445,7 @@ export function buildOverview(docs: DocSection[], origin = ""): DocSection {
     blocks: [
       {
         type: "p",
-        text: "**@gntrees/docs-viewer** is a framework-agnostic document viewer: a Web Component (`<gnt-docs-viewer>`) that renders PDF, Office, images, video and code, choosing a renderer automatically and falling back when one fails. Use it from plain HTML, React, Vue or Solid — or mount it straight from a URL with a single `?file=…` parameter.",
+        text: "**@gntrees/docs-viewer** is a framework-agnostic document viewer: a Web Component (`<gnt-docs-viewer>`) that renders PDF, Office, images, video and code, choosing a renderer automatically and falling back when one fails. Use it from plain HTML, React, Preact, Vue, Svelte or Solid — or mount it straight from a URL with a single `?file=…` parameter.",
       },
       {
         type: "p",

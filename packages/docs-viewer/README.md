@@ -1,11 +1,12 @@
 # @gntrees/docs-viewer
 
 A framework-agnostic document viewer shipped as a Web Component
-(`<gnt-docs-viewer>`). One core, consumable from plain JS/HTML, React, Vue or
-Solid — plus a `standalone` entry that renders straight from URL query params.
+(`<gnt-docs-viewer>`). One core, consumable from plain JS/HTML, React, Preact,
+Vue, Svelte or Solid — plus a `standalone` entry that renders straight from URL
+query params.
 
 - **Plain JS / HTML** — `<script type="module">` + a tag.
-- **React / Vue / Solid** — thin wrappers over the same custom element.
+- **React / Preact / Vue / Svelte / Solid** — thin wrappers over the same custom element.
 - **URL mode** — `?file=…&engine=iframe`.
 - **No framework in the core** — the core is vanilla TypeScript with zero UI
   dependencies. Framework libs are optional peer dependencies.
@@ -23,7 +24,9 @@ Framework bindings pull the framework only if you import them:
 
 ```sh
 bun add react react-dom          # for @gntrees/docs-viewer/react
+bun add preact                   # for @gntrees/docs-viewer/preact
 bun add vue                      # for @gntrees/docs-viewer/vue
+bun add svelte                   # for @gntrees/docs-viewer/svelte
 bun add solid-js                 # for @gntrees/docs-viewer/solid
 ```
 
@@ -66,6 +69,23 @@ export function App() {
 }
 ```
 
+### Preact
+
+```tsx
+import { DocsViewer } from "@gntrees/docs-viewer/preact";
+
+export function App() {
+  return (
+    <DocsViewer
+      source="/docs/report.pdf"
+      style={{ height: "80vh" }}
+      onReady={(ctx) => console.log("ready", ctx)}
+      onError={(err) => console.error(err)}
+    />
+  );
+}
+```
+
 ### Vue
 
 ```vue
@@ -77,6 +97,20 @@ const config = { source: "/docs/report.pdf" };
 <template>
   <DocsViewer :config="config" style="height: 80vh" @ready="onReady" @error="onError" />
 </template>
+```
+
+### Svelte
+
+The Svelte entry exports an [action](https://svelte.dev/docs/svelte/use) — no
+component compilation, just `use:docsViewer`:
+
+```svelte
+<script>
+  import { docsViewer } from "@gntrees/docs-viewer/svelte";
+  const config = { source: "/docs/report.pdf" };
+</script>
+
+<div style="height: 80vh" use:docsViewer={{ ...config, onReady: (ctx) => console.log(ctx) }}></div>
 ```
 
 ### Solid

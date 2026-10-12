@@ -70,7 +70,9 @@ const ENGINE_LABELS: Record<string, string> = {
 const FRAMEWORKS: Array<{ key: string; label: string; lang: string }> = [
   { key: "html", label: "Plain JS / HTML", lang: "html" },
   { key: "react", label: "React", lang: "tsx" },
+  { key: "preact", label: "Preact", lang: "tsx" },
   { key: "vue", label: "Vue", lang: "vue" },
+  { key: "svelte", label: "Svelte", lang: "svelte" },
   { key: "solid", label: "Solid", lang: "tsx" },
 ];
 
@@ -592,7 +594,15 @@ function buildSnippet(framework: string, config: Record<string, unknown>): strin
 const config = ${json};
 
 export function App() {
-  return <DocsViewer config={config} />;
+  return <DocsViewer {...config} />;
+}`;
+    case "preact":
+      return `import { DocsViewer } from "@gntrees/docs-viewer/preact";
+
+const config = ${json};
+
+export function App() {
+  return <DocsViewer {...config} />;
 }`;
     case "solid":
       return `import { DocsViewer } from "@gntrees/docs-viewer/solid";
@@ -600,8 +610,16 @@ export function App() {
 const config = ${json};
 
 export function App() {
-  return <DocsViewer config={config} />;
+  return <DocsViewer {...config} />;
 }`;
+    case "svelte":
+      return `<script>
+import { docsViewer } from "@gntrees/docs-viewer/svelte";
+
+const config = ${json};
+</script>
+
+<div style="height: 100%" use:docsViewer={config}></div>`;
     case "vue":
       return `<script setup>
 import { DocsViewer } from "@gntrees/docs-viewer/vue";
