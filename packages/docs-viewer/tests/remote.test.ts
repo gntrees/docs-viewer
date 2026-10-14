@@ -25,10 +25,10 @@ function context(kind: RenderContext["kind"]): RenderContext {
 describe("remote viewer URLs", () => {
   it("builds Microsoft and Google URLs with an encoded source", () => {
     expect(microsoftViewerUrl(source)).toBe(
-      "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(source),
+      `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(source)}`,
     );
     expect(googleViewerUrl(source)).toBe(
-      "https://docs.google.com/viewer?embedded=true&url=" + encodeURIComponent(source),
+      `https://docs.google.com/viewer?embedded=true&url=${encodeURIComponent(source)}`,
     );
   });
 });

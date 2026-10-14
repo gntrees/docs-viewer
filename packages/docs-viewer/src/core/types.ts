@@ -29,9 +29,10 @@ export type BuiltinEngine =
   | "google-docs-viewer";
 
 /**
- * Engine preference. `"auto"` tries the recommended renderers in priority order
- * and falls back on failure; any other value is a *preference* tried first, with
- * the remaining renderers still available as fallbacks. Custom renderers may use
+ * Engine selection. `"auto"` (the default) tries every matching renderer in
+ * priority order and falls back to the next one on failure. Any other value is
+ * **exclusive**: only renderers whose `engine` matches are used, and a failure is
+ * reported instead of falling back to the next renderer. Custom renderers may use
  * their own engine names.
  */
 export type Engine = BuiltinEngine | (string & {});
@@ -226,7 +227,12 @@ export interface RenderContext {
 }
 
 export interface RendererInstance {
-  /** Called when the config changes without a full remount. Optional. */
+  /**
+   * Apply a config change in place, instead of a full remount. Optional: the
+   * element only calls it when the resolved document is unchanged (same source,
+   * type, loader and detection) and this renderer is still the first candidate.
+   * When a renderer omits it, the element destroys and re-mounts it instead.
+   */
   update?(ctx: RenderContext): void | Promise<void>;
   destroy(): void;
 }

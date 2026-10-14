@@ -133,6 +133,7 @@ export const panzoomRenderer: Renderer = {
     root.appendChild(bar);
 
     let disposed = false;
+    let currentUrl = ctx.displayUrl;
     let instance: PanzoomInstance | null = null;
     let removeWheel: (() => void) | null = null;
     let fullscreenEnabled = ctx.config.image.fullscreen !== false;
@@ -257,16 +258,22 @@ export const panzoomRenderer: Renderer = {
 
     return {
       update(next) {
+        // Reset zoom/rotation only when the image actually changes; a cosmetic
+        // config change (e.g. `image.fullscreen`) keeps the current view.
+        const sourceChanged = next.displayUrl !== currentUrl;
+        currentUrl = next.displayUrl;
         img.alt = next.name;
-        img.src = next.displayUrl;
-        rotation = 0;
-        flipH = false;
-        flipV = false;
-        applyTransform();
+        if (sourceChanged) {
+          img.src = next.displayUrl;
+          rotation = 0;
+          flipH = false;
+          flipV = false;
+          applyTransform();
+          instance?.reset();
+        }
         fullscreenEnabled = next.config.image.fullscreen !== false;
         fullscreenBtn.hidden = !fullscreenEnabled;
         wireImageClick();
-        instance?.reset();
       },
       destroy() {
         disposed = true;

@@ -1,5 +1,4 @@
 import { h } from "preact";
-import type { VNode } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import type { RenderContext, ViewerConfig } from "./core/types";
 import { defineDocsViewer, DocsViewerElement, TAG } from "./element";
@@ -18,7 +17,7 @@ export interface DocsViewerProps extends ViewerConfig {
  * The custom element is created imperatively, so it works under `preact/compat`,
  * SSR hydration and StrictMode-style double-invocation alike.
  */
-export function DocsViewer(props: DocsViewerProps): VNode<any> {
+export function DocsViewer(props: DocsViewerProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const elementRef = useRef<DocsViewerElement | null>(null);
   const latest = useRef(props);

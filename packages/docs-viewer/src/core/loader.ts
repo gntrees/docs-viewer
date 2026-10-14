@@ -10,8 +10,9 @@ export interface LoadedDocument {
 /**
  * Resolve the URL a renderer should display.
  *
- * `direct` (the default) passes the original URL straight through, which avoids
- * CORS entirely and is the only mode that works with the remote iframe viewers.
+ * `direct` (and the default `auto`, which resolves to it here) passes the original
+ * URL straight through, which avoids CORS entirely and is the only mode that works
+ * with the remote iframe viewers.
  * `blob` fetches the bytes (requires CORS on the file host) and is useful when
  * the source URL is short-lived or must not be exposed to a third party.
  */

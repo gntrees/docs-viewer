@@ -63,7 +63,6 @@ describe("fontRenderer", () => {
     vi.stubGlobal(
       "FontFace",
       class {
-        constructor() {}
         async load(): Promise<never> {
           throw new Error("bad font");
         }

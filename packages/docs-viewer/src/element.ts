@@ -214,7 +214,55 @@ export class DocsViewerElement extends HTMLElementBase {
     else this.removeAttribute("data-theme");
 
     this.dispatchEvent(new CustomEvent("gnt-config-change", { detail: config }));
+
+    // A change that cannot affect loading (theme, `image.fullscreen`, `video.*`, …)
+    // is applied in place when the mounted renderer supports it, so the document is
+    // not re-fetched and re-detected for a purely cosmetic update.
+    if (this.#updateInPlace(config)) return;
     void this.#load(config);
+  }
+
+  /**
+   * Apply a config change to the mounted renderer without reloading the document.
+   * Only safe when nothing that feeds loading/detection changed; returns `false`
+   * to fall through to a full reload.
+   */
+  #updateInPlace(config: ResolvedConfig): boolean {
+    const active = this.#activeContext;
+    const instance = this.#instance;
+    if (!active || !instance?.update) return false;
+    if (this.#loadSignature(active.config) !== this.#loadSignature(config)) return false;
+
+    const next: RenderContext = {
+      ...active,
+      config,
+      fail: (error) => this.#handleCandidateFailure(this.#runId, error),
+    };
+    try {
+      const result = instance.update(next);
+      if (result instanceof Promise) {
+        void result.catch((error) => this.#handleCandidateFailure(this.#runId, error));
+      }
+    } catch {
+      return false;
+    }
+    this.#activeContext = next;
+    this.dispatchEvent(new CustomEvent("gnt-ready", { detail: next }));
+    return true;
+  }
+
+  /** Config fields whose change requires re-fetching/re-detecting the document. */
+  #loadSignature(config: ResolvedConfig): string {
+    return JSON.stringify([
+      config.source,
+      config.name,
+      config.type,
+      config.entry,
+      config.loader,
+      config.credentials,
+      config.preflight,
+      config.engine,
+    ]);
   }
 
   async #load(config: ResolvedConfig): Promise<void> {

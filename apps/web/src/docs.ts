@@ -219,7 +219,9 @@ if (toc && content) {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           const id = entry.target.id;
-          links.forEach((link, key) => link.classList.toggle("active", key === id));
+          links.forEach((link, key) => {
+            link.classList.toggle("active", key === id);
+          });
         }
       },
       { rootMargin: "-70px 0px -65% 0px" },

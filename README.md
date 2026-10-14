@@ -5,11 +5,19 @@ Monorepo for a framework-agnostic document viewer.
 ```
 apps/
   web/                Plain Vite site — home page + docs + live demo
+  frameworks/         Five-wrapper lab (React, Preact, Vue, Svelte, Solid)
 packages/
   docs-viewer/        @gntrees/docs-viewer — the library (Web Component)
 examples/
   html/               Minimal plain-HTML, URL-driven example
+docs/
+  reference/          Vendored third-party docs (research only, not ours)
 ```
+
+`apps/web` aliases the library to its TypeScript source, so it always reflects
+local changes. `apps/frameworks` instead installs `@gntrees/docs-viewer` from the
+**published npm tarball**, so the five wrappers are exercised against the real
+released package rather than a workspace link.
 
 ## The library: `@gntrees/docs-viewer`
 
@@ -46,6 +54,7 @@ bun run viewer:test       # vitest
 
 bun run web:dev           # run the Vite site (home + /docs)
 bun run web:build         # build the site to apps/web/dist
+bun run frameworks:dev    # run the five-framework wrapper lab
 bun run example:serve     # serve the repo root for the plain-HTML example
 ```
 

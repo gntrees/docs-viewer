@@ -505,6 +505,71 @@ describe("DocsViewerElement", () => {
     expect(element.textContent).toContain("kaboom");
   });
 
+  it("updates the mounted renderer in place when only cosmetic config changes", async () => {
+    const mounts: string[] = [];
+    const updates: string[] = [];
+    const renderer: Renderer = {
+      id: "updatable",
+      priority: 1000,
+      match: () => true,
+      mount(container, ctx) {
+        mounts.push(ctx.name);
+        const node = document.createElement("div");
+        node.dataset.testid = "updatable";
+        container.appendChild(node);
+        return {
+          update(next) {
+            updates.push(next.config.theme);
+          },
+          destroy() {
+            node.remove();
+          },
+        };
+      },
+    };
+    const element = create({ source: "/a.pdf" }, renderer);
+    await flush();
+
+    element.config = { source: "/a.pdf", theme: "dark" };
+    await flush();
+
+    // Theme is not load-affecting, so the renderer is updated rather than remounted.
+    expect(updates).toEqual(["dark"]);
+    expect(mounts).toEqual(["a.pdf"]);
+  });
+
+  it("remounts when a load-affecting field changes", async () => {
+    const mounts: string[] = [];
+    const updates: string[] = [];
+    const renderer: Renderer = {
+      id: "updatable",
+      priority: 1000,
+      match: () => true,
+      mount(container, ctx) {
+        mounts.push(ctx.name);
+        const node = document.createElement("div");
+        node.dataset.testid = "updatable";
+        container.appendChild(node);
+        return {
+          update() {
+            updates.push("update");
+          },
+          destroy() {
+            node.remove();
+          },
+        };
+      },
+    };
+    const element = create({ source: "/a.pdf" }, renderer);
+    await flush();
+
+    element.config = { source: "/b.pdf" };
+    await flush();
+
+    expect(updates).toEqual([]);
+    expect(mounts).toEqual(["a.pdf", "b.pdf"]);
+  });
+
   it("cleans up the renderer on disconnect", async () => {
     const element = create({ source: "/a.pdf" });
     await flush();

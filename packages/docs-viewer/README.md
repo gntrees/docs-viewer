@@ -8,6 +8,8 @@ query params.
 - **Plain JS / HTML** — `<script type="module">` + a tag.
 - **React / Preact / Vue / Svelte / Solid** — thin wrappers over the same custom element.
 - **URL mode** — `?file=…&engine=iframe`.
+- **Many formats** — PDF, images, video/audio (incl. HLS), code/text, CSV tables,
+  HTML/Markdown, fonts and ZIP/RAR/TAR archives, plus Office via a remote viewer.
 - **No framework in the core** — the core is vanilla TypeScript with zero UI
   dependencies. Framework libs are optional peer dependencies.
 - **No Tailwind in the library** — styles are injected once and themed with CSS
@@ -132,8 +134,8 @@ export function App() {
 </script>
 ```
 
-Then open `/index.html?file=/docs/report.pdf`. The `standalone` entry
-mounts into `[data-gnt-viewer]`, then `#app`, then the page body.
+Then open `/index.html?file=/docs/report.pdf`. The `standalone` entry mounts into
+`[data-gnt-viewer]`, then `#app`, then the page body.
 
 ## Configuration
 
@@ -144,15 +146,27 @@ Sources are merged in this order (later wins):
 | Field | Type | Default | Notes |
 |---|---|---|---|
 | `source` | `string` | — | Document URL. Query aliases: `file`, `url`, `src`. |
-| `name` | `string` | from URL | Display name + extension detection + download name. |
-| `type` | `string` | auto | Force a MIME type or extension, e.g. `pdf`. |
-| `loader` | `auto \| blob \| direct` | `auto` | See *Loading & CORS* below. |
-| `credentials` | `RequestCredentials` | `same-origin` | Used when `loader` is `blob`. |
-| `engine` | `auto \| iframe \| native \| panzoom \| shiki \| microsoft-docs-viewer \| google-docs-viewer` | `auto` | Engine preference; `auto` uses the recommended order with fallback. Query alias: `engine`. |
-| `preflight` | `boolean` | `true` | CORS `HEAD` reachability check before rendering; a 404/410 fails fast. |
+| `name` | `string` | from URL | Display name; its extension is a last-resort detection hint (Content-Type wins). Advanced (`?config=`). |
+| `entry` | `string` | — | Deep-link one member of an archive: the archive at `source` opens with its path restored to `entry`, and the member is previewed below it. A `/`-separated path that may chain **through nested archives** (`inner.zip/doc.pdf`). Advanced (`?config=`). |
+| `entryBase` | `string` | current page | Absolute base URL the archive uses for its member deep-links. Advanced (`?config=`); normally unnecessary. |
+| `type` | `string` | `auto` | Lock detection: a kind alias (`pdf`, `image`, `video`, `audio`, `text`, `code`, `table`, `markup`, `html`, `markdown`, `font`, `archive`, `office`, `word`, `excel`, `powerpoint`), a MIME (`application/pdf`) or family (`image/*`), or a bare extension (`docx`). `auto` detects from the Content-Type; the URL extension is only a last resort. Query alias: `type`. |
+| `engine` | `auto \| iframe \| native \| panzoom \| shiki \| hls \| table \| markup \| font \| archive \| microsoft-docs-viewer \| google-docs-viewer` | `auto` | `auto` uses the recommended order with fallback; any other value is **exclusive** (see *Engine & fallback*). Query alias: `engine`. |
+| `loader` | `auto \| direct \| blob` | `auto` | `direct` streams the file over HTTP range requests (no CORS needed); `blob` fetches the whole file first (needs CORS). Query alias: `loader`. |
+| `credentials` | `omit \| same-origin \| include` | `same-origin` | Request credentials mode, used when `loader: blob`. Query alias: `credentials`. |
+| `preflight` | `true \| false \| auto` | `true` | CORS `HEAD` probe before rendering. `true` always probes absolute `http(s)` URLs (a definitive 404/410 fails fast); `false` never probes; `auto` probes only when the type needs detecting. Streaming media is never probed, and a slow probe is abandoned (treated as unknown). Query alias: `preflight`. |
+| `theme` | `auto \| light \| dark` | `auto` | Colour theme. `auto` follows `prefers-color-scheme`; `light`/`dark` pin `data-theme` on the host. Query alias: `theme`. |
 | `code.theme` | `string` | `github-light`/`github-dark` | Shiki theme for the `shiki` engine. |
-| `code.lang` | `string` | from extension | Force a Shiki language id for the `shiki` engine. |
-| `image.fullscreen` | `boolean` | `true` | Click the image to open it fullscreen (`panzoom` engine). |
+| `code.lang` | `string` | from extension | Force a Shiki language id. Query alias: `lang`. |
+| `image.fullscreen` | `boolean` | `true` | Click-to-fullscreen and the toolbar's fullscreen button (`panzoom` engine). |
+| `video.controls` | `boolean` | `true` | Show the browser's native controls (`native` engine). |
+| `video.autoplay` | `boolean` | `false` | Autoplay on load (browsers require muted media). |
+| `video.muted` | `boolean` | `true` when autoplay | Start muted. |
+| `video.loop` | `boolean` | `false` | Loop playback. |
+| `video.poster` | `string` | — | Poster image URL (video only). |
+| `video.info` | `boolean` | `true` | Show the format/duration/seek/buffer info line (`native` & `hls` engines). |
+| `markup.sandbox` | `boolean` | `true` | Render HTML/Markdown in a sandboxed `<iframe>` (no scripts, no same-origin). Set `false` to render inline (trusted sources only). |
+| `markup.baseUrl` | `string` | source directory | Base URL for relative links/images inside the rendered document. |
+| `markup.gfm` | `boolean` | `true` | Enable GitHub-Flavored Markdown. |
 
 Complex config can be passed in a link as base64url JSON:
 
@@ -173,8 +187,15 @@ Complex config can be passed in a link as base64url JSON:
 | Kind | Renderer | Notes |
 |---|---|---|
 | `pdf` | `<iframe>` | Native browser PDF viewer (`engine: "iframe"`). |
-| `image` | Panzoom | Inline zoom/pan viewer with an inline-SVG toolbar (`engine: "panzoom"`) → native `<img>`. Click opens fullscreen (`image.fullscreen`). |
+| `image` | Panzoom | Inline zoom/pan/rotate/flip viewer with an inline-SVG toolbar (`engine: "panzoom"`) → native `<img>`. Click opens fullscreen (`image.fullscreen`). |
+| `video` | Native `<video>` | HTML5 player (`engine: "native"`) → `google-docs-viewer`. |
+| `audio` | Native `<audio>` | HTML5 audio (`engine: "native"`). |
+| `video (.m3u8)` | hls.js | HLS streaming, segment by segment (`engine: "hls"`) → `native` → `google-docs-viewer`. |
 | `text` | Shiki | `shiki` (syntax highlight) → `google-docs-viewer`. Fetches the bytes (needs CORS). |
+| `table` | Built-in `<table>` | CSV/TSV/TAB via a built-in RFC 4180 parser (`engine: "table"`) → `shiki` → download. Fetches the bytes (needs CORS). Excel stays `office`. |
+| `markup` | Rendered + Shiki (source) | HTML and Markdown (`engine: "markup"`); the displayed document by default, with the content bar's toggle switching to the Shiki-highlighted source. Sandboxed by default (`markup.sandbox`). Falls back to `shiki` → `google-docs-viewer` → download. |
+| `font` | Specimen | `FontFace` specimen with the real Family/Subfamily and unitsPerEm (`engine: "font"`) → `google-docs-viewer` → download. |
+| `archive` | Browser | Google-Drive-style ZIP/RAR/TAR browser (`engine: "archive"`), with folders, nested archives and member deep-links → `google-docs-viewer` → download. |
 | `office` | `<iframe>` (remote) | `microsoft-docs-viewer` (default) → `google-docs-viewer`. |
 | other | fallback | Message + download link. |
 
@@ -182,10 +203,8 @@ Complex config can be passed in a link as base64url JSON:
 
 `engine: "auto"` (the default) is the only mode that falls back: matching
 renderers are ordered by priority and the viewer moves to the next one whenever
-one fails.
-
-`auto` (the default) prefers the zero-dependency native engine and keeps the
-richer engines as fallbacks:
+one fails. It prefers the zero-dependency native engines and keeps the richer
+engines as fallbacks:
 
 | Kind | auto order |
 |---|---|
@@ -193,7 +212,13 @@ richer engines as fallbacks:
 | image | `panzoom` → `native` → `google-docs-viewer` → download |
 | office | `microsoft-docs-viewer` → `google-docs-viewer` → download |
 | text | `shiki` → `google-docs-viewer` → download |
-| video | `google-docs-viewer` → download |
+| table | `table` → `shiki` → `google-docs-viewer` → download |
+| markup | `markup` → `shiki` → `google-docs-viewer` → download |
+| font | `font` → `google-docs-viewer` → download |
+| archive | `archive` → `google-docs-viewer` → download |
+| video | `native` → `google-docs-viewer` → download |
+| audio | `native` → download |
+| `.m3u8` | `hls` → `native` → `google-docs-viewer` → download |
 
 Selecting a specific engine is **exclusive** — only that engine is used, and if
 it cannot render the document the viewer reports an error (no fallback):
@@ -203,10 +228,10 @@ it cannot render the document the viewer reports an error (no fallback):
 ```
 
 `shiki` powers the `shiki` engine — syntax highlighting for every `text`-kind
-document (plain text *and* source code). It is a regular dependency, loaded
-lazily (code-split by your bundler) and, on failure, `auto` falls back to the
-remote viewers. Control it with `code.theme` / `code.lang`; the theme follows
-`prefers-color-scheme` (`github-light` / `github-dark`) by default.
+document (plain text *and* source code, 200+ languages). It is a regular
+dependency, loaded lazily (code-split by your bundler) and, on failure, `auto`
+falls back to the remote viewers. Control it with `code.theme` / `code.lang`; the
+theme follows `prefers-color-scheme` (`github-light` / `github-dark`) by default.
 
 `panzoom` powers the `panzoom` engine — an inline [Panzoom](https://github.com/timmywil/panzoom)
 image viewer (wheel-zoom, drag-to-pan, no external UI) loaded lazily the same
@@ -216,6 +241,12 @@ fullscreen. Rotation is applied to the image while Panzoom transforms a wrapper,
 so panning stays aligned to the screen at any rotation. The only configurable
 option is click-to-fullscreen (`image.fullscreen`, default `true`). If it cannot
 load, `auto` falls back to the native `<img>`.
+
+`hls` powers the `hls` engine for `.m3u8` playlists, using [hls.js](https://github.com/video-dev/hls.js)
+(loaded lazily) for adaptive streaming; it falls back to the native `<video>`
+and then the remote viewers. Video and audio use the browser's own `<video>` /
+`<audio>` element (`native` engine), and large files stream over HTTP range
+requests rather than downloading in full.
 
 ### Office & remote viewers
 
@@ -258,7 +289,11 @@ DocsViewerElement.registry.register({
   match: (ctx) => ctx.kind === "pdf",
   mount(container, ctx) {
     // ...render into container...
-    return { destroy() { /* cleanup */ } };
+    return {
+      // Optional: apply config changes without a remount.
+      update(next) { /* … */ },
+      destroy() { /* cleanup */ },
+    };
   },
 });
 ```

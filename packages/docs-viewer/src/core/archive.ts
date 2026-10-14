@@ -1,3 +1,4 @@
+import type { Extractor } from "node-unrar-js";
 import {
   baseName,
   findZipEntry,
@@ -167,7 +168,9 @@ function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 const normalizePath = (value: string): string =>
   value.replace(/^\/+/, "").replace(/\\/g, "/").replace(/^\.\//, "");
 
-async function createRarExtractor(buffer: ArrayBuffer): Promise<{ extractor: any }> {
+async function createRarExtractor(
+  buffer: ArrayBuffer,
+): Promise<{ extractor: Extractor<Uint8Array> }> {
   const { createExtractorFromData } = await import("node-unrar-js");
   const wasmBinary = await loadUnrarWasm();
   return { extractor: await createExtractorFromData({ data: buffer, wasmBinary }) };

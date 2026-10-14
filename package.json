@@ -25,6 +25,11 @@
     "frameworks:typecheck": "bun run --filter frameworks typecheck",
     "frameworks:preview": "bun run --filter frameworks preview",
     "web:deploy": "sh apps/web/scripts/deploy-gh-pages.sh",
-    "example:serve": "bunx --bun serve ."
+    "example:serve": "bunx --bun serve .",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15"
   }
 }
