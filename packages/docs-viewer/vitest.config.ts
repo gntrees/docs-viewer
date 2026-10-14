@@ -10,7 +10,7 @@ export default defineConfig({
   },
   test: {
     environment: "happy-dom",
-    include: ["tests/**/*.test.ts"],
+    include: ["src/test/**/*.test.ts"],
     restoreMocks: true,
   },
 });

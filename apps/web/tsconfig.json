@@ -13,7 +13,7 @@
     "noUncheckedIndexedAccess": true,
     "types": ["vite/client"],
     "paths": {
-      "@gntrees/docs-viewer": ["../../packages/docs-viewer/src/index.ts"],
+      "@gntrees/docs-viewer": ["../../packages/docs-viewer/src/entry/index.ts"],
       "@gntrees/docs-viewer/*": ["../../packages/docs-viewer/src/*"]
     }
   },

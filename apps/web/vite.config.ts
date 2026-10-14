@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
-import { buildOverview, sections } from "./src/docs-content";
-import { docsToMarkdown, markdownFileName, overviewToLlmsTxt, sectionToMarkdown } from "./src/docs-markdown";
+import { buildOverview, sections } from "./src/docs/docs-content";
+import { docsToMarkdown, markdownFileName, overviewToLlmsTxt, sectionToMarkdown } from "./src/docs/docs-markdown";
 
 const r = (path: string): string => fileURLToPath(new URL(path, import.meta.url));
 
@@ -112,7 +112,7 @@ export default defineConfig(({ command, isPreview }) => ({
   plugins: [viewTrailingSlash(), docsMarkdown()],
   resolve: {
     alias: [
-      { find: /^@gntrees\/docs-viewer$/, replacement: r("../../packages/docs-viewer/src/index.ts") },
+      { find: /^@gntrees\/docs-viewer$/, replacement: r("../../packages/docs-viewer/src/entry/index.ts") },
       { find: /^@gntrees\/docs-viewer\/(.*)$/, replacement: r("../../packages/docs-viewer/src/$1") },
     ],
   },

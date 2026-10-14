@@ -5,7 +5,7 @@
 **Do not run the full test suite by default.** Run only the test(s) relevant to the
 files you changed, then stop. Only run the whole suite when the user explicitly asks
 for it, or when the change touches shared/core code that many test files depend on
-(e.g. `src/core/types.ts`, `src/core/config.ts`, `src/index.ts`).
+(e.g. `src/core/types.ts`, `src/core/config.ts`, `src/entry/index.ts`).
 
 Rationale: each test file spins up its own happy-dom environment and the Shiki tests
 load the highlighter, so a full run takes ~15s and is mostly redundant for a focused
@@ -16,8 +16,8 @@ change. A single file runs in ~2s.
 From the repo root, pass file filters to Vitest after `--`:
 
 ```sh
-bun run --filter @gntrees/docs-viewer test -- tests/detect.test.ts
-bun run --filter @gntrees/docs-viewer test -- tests/detect.test.ts tests/shiki.test.ts
+bun run --filter @gntrees/docs-viewer test -- src/test/detect.test.ts
+bun run --filter @gntrees/docs-viewer test -- src/test/detect.test.ts src/test/shiki.test.ts
 ```
 
 Filter by test name with `-t`:
@@ -30,13 +30,13 @@ bun run --filter @gntrees/docs-viewer test -- -t "detect"
 
 | Changed source | Test file |
 | --- | --- |
-| `src/core/detect.ts` | `tests/detect.test.ts` |
-| `src/core/config.ts` | `tests/config.test.ts` |
-| `src/core/preflight.ts` | `tests/preflight.test.ts` |
-| `src/core/registry.ts` | `tests/registry.test.ts` |
-| `src/element.ts` | `tests/element.test.ts` |
-| `src/renderers/shiki.ts` | `tests/shiki.test.ts` |
-| `src/renderers/remote.ts` | `tests/remote.test.ts` |
+| `src/core/detect.ts` | `src/test/detect.test.ts` |
+| `src/core/config.ts` | `src/test/config.test.ts` |
+| `src/core/preflight.ts` | `src/test/preflight.test.ts` |
+| `src/core/registry.ts` | `src/test/registry.test.ts` |
+| `src/core/element.ts` | `src/test/element.test.ts` |
+| `src/renderer/shiki.ts` | `src/test/shiki.test.ts` |
+| `src/renderer/remote.ts` | `src/test/remote.test.ts` |
 
 The `apps/web` site has no test suite — verify it with `bun run web:typecheck` and
 `bun run web:build` instead.
