@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/docs-viewer/logo.svg" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash of the wrong theme.
+      try {
+        var t = localStorage.getItem("gnt-docs-viewer-theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <title>Gntrees Docs Viewer</title>
+    <meta
+      name="description"
+      content="A framework-agnostic document viewer: PDF, Office, images and code, from plain HTML, React, Preact, Vue, Svelte, Solid or a URL."
+    />
+    <script type="module" crossorigin src="/docs-viewer/assets/home-BPN6ZqnS.js"></script>
+    <link rel="modulepreload" crossorigin href="/docs-viewer/assets/style-BnUw8Jj3.js">
+    <link rel="modulepreload" crossorigin href="/docs-viewer/assets/index-CciWGl75.js">
+    <link rel="modulepreload" crossorigin href="/docs-viewer/assets/theme-Bv4ANHp4.js">
+    <link rel="stylesheet" crossorigin href="/docs-viewer/assets/style-CW7hOaFn.css">
+  </head>
+  <body>
+    <a
+      class="icon-button github-toggle"
+      href="https://github.com/gntrees/docs-viewer"
+      target="_blank"
+      rel="noopener"
+      aria-label="GitHub repository"
+    >
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    </a>
+    <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
+      ◐
+    </button>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Gntrees</p>
+        <h1>Docs Viewer</h1>
+        <p class="lead">View PDF, Office, images and code in any framework — or straight from a URL.</p>
+        <div class="cta">
+          <a class="btn" href="./docs/">Read the docs</a>
+          <a class="btn ghost" href="#playground">Playground</a>
+        </div>
+        <pre class="install"><code>bun add @gntrees/docs-viewer</code></pre>
+      </section>
+
+      <section id="playground">
+        <h2>Playground</h2>
+
+        <div class="demo-controls">
+          <div class="field">
+            <label for="demo-type">Type</label>
+            <select id="demo-type"></select>
+          </div>
+          <div class="field" id="demo-lang-field" hidden>
+            <label for="demo-lang">Language</label>
+            <select id="demo-lang"></select>
+          </div>
+          <div class="field">
+            <label for="demo-sample">Sample</label>
+            <select id="demo-sample"></select>
+          </div>
+          <div class="field">
+            <label for="demo-engine">Engine</label>
+            <select id="demo-engine"></select>
+          </div>
+          <div class="field">
+            <label for="demo-theme">Theme</label>
+            <select id="demo-theme">
+              <option value="auto">auto (system)</option>
+              <option value="light">light</option>
+              <option value="dark">dark</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="demo-note" id="demo-shiki-note" hidden>
+          Language lists a curated subset of Shiki's 200+ supported languages — see the
+          <a href="https://shiki.style/languages" target="_blank" rel="noopener">full language list</a>
+          and the <a href="https://shiki.style" target="_blank" rel="noopener">Shiki docs</a>. To highlight
+          any other language, set <code>code.lang</code> in the advanced config below.
+        </p>
+
+        <div class="demo-frame" id="playground-host"></div>
+        <p class="demo-hint" id="playground-hint"></p>
+
+        <div class="playground-row">
+          <label for="demo-url">File URL</label>
+          <input id="demo-url" type="text" placeholder="https://…" spellcheck="false" />
+        </div>
+        <div class="playground-toggle">
+          <label class="checkbox" for="demo-advanced-toggle">
+            <input type="checkbox" id="demo-advanced-toggle" />
+            <span>Advanced config (JSON)</span>
+          </label>
+        </div>
+        <div class="playground-row">
+          <span class="playground-row-label">Preview link</span>
+          <span class="info" tabindex="0">
+            <span class="info-icon" aria-hidden="true">i</span>
+            <span class="info-card" role="tooltip">
+              <strong>Query params</strong> (always readable in the URL):
+              <ul>
+                <li><code>file</code> — document URL</li>
+                <li><code>type</code> — lock detection</li>
+                <li><code>engine</code> — renderer preference</li>
+                <li><code>theme</code> — auto | light | dark</li>
+                <li><code>loader</code> — auto | blob | direct</li>
+                <li><code>credentials</code> — omit | same-origin | include</li>
+                <li><code>preflight</code> — true | false | auto</li>
+              </ul>
+              <strong>Advanced config blob</strong> (<code>?config=</code>):
+              <ul>
+                <li><code>name</code> — display name override</li>
+                <li><code>entry</code> — archive member deep-link</li>
+                <li><code>entryBase</code> — base URL for member links</li>
+                <li><code>code</code> — { theme, lang }</li>
+                <li><code>image</code> — { fullscreen }</li>
+                <li><code>video</code> — { controls, autoplay, muted, loop, poster, info }</li>
+                <li><code>markup</code> — { sandbox, baseUrl, gfm }</li>
+              </ul>
+            </span>
+          </span>
+          <code id="playground-link"></code>
+          <button class="btn ghost" type="button" id="playground-open">Open in new page</button>
+          <button class="btn ghost" type="button" id="playground-copy">Copy</button>
+        </div>
+
+        <details class="demo-advanced" id="demo-advanced" hidden>
+          <summary>Advanced config (JSON)</summary>
+          <p class="demo-note">The complete viewer config for the current filter. Universal knobs — <code>file</code>, <code>type</code>, <code>engine</code>, <code>theme</code>, <code>loader</code>, <code>credentials</code>, <code>preflight</code> — become query params; the rest — <code>name</code>, <code>entry</code>, <code>entryBase</code>, <code>code</code>, <code>image</code>, <code>video</code>, <code>markup</code> — become the base64url <code>?config=</code> blob. Edit the JSON, then press Apply.</p>
+          <textarea id="demo-config" spellcheck="false" aria-label="Viewer config JSON"></textarea>
+          <div class="row">
+            <button class="btn" type="button" id="demo-config-apply">Apply config</button>
+            <span class="error" id="demo-config-error"></span>
+          </div>
+        </details>
+
+        <div class="playground-row">
+          <label for="playground-code-lang">Framework</label>
+          <select id="playground-code-lang"></select>
+        </div>
+        <div class="code-block" id="playground-code"></div>
+      </section>
+
+      <section class="why">
+        <h2>Why</h2>
+        <ul class="why-list">
+          <li>
+            <strong>Framework-agnostic.</strong> A vanilla TypeScript core; the React, Preact,
+            Vue, Svelte and Solid wrappers are optional peers.
+          </li>
+          <li>
+            <strong>URL-first.</strong> One <code>?file=…</code> query parameter renders a document —
+            no application code.
+          </li>
+          <li>
+            <strong>Broad coverage.</strong> PDF, Office, images, video and code, with automatic
+            fallback between engines.
+          </li>
+          <li>
+            <strong>Lean by default.</strong> No UI dependencies; the heavy engines load only when a
+            document needs them.
+          </li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer>
+      <p>MIT licensed. Built as a Web Component with a vanilla TypeScript core.</p>
+    </footer>
+
+  </body>
+</html>
