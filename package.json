@@ -20,6 +20,10 @@
     "web:build": "bun run --filter web build",
     "web:typecheck": "bun run --filter web typecheck",
     "web:preview": "bun run --filter web preview",
+    "frameworks:dev": "bun run --filter frameworks dev",
+    "frameworks:build": "bun run --filter frameworks build",
+    "frameworks:typecheck": "bun run --filter frameworks typecheck",
+    "frameworks:preview": "bun run --filter frameworks preview",
     "web:deploy": "sh apps/web/scripts/deploy-gh-pages.sh",
     "example:serve": "bunx --bun serve ."
   }

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/src/shared/style.css" />
+    <title>React — docs-viewer frameworks</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="../">docs-viewer <span>frameworks</span></a>
+      <nav class="nav">
+        <a href="../react/" aria-current="page">React</a>
+        <a href="../preact/">Preact</a>
+        <a href="../vue/">Vue</a>
+        <a href="../svelte/">Svelte</a>
+        <a href="../solid/">Solid</a>
+      </nav>
+    </header>
+    <main>
+      <h1>React</h1>
+      <p class="subtitle">
+        Minimal playground rendered with the <code>@gntrees/docs-viewer/react</code> wrapper.
+      </p>
+      <section class="controls">
+        <div class="field">
+          <label for="type">Type</label>
+          <select id="type"></select>
+        </div>
+        <div class="field">
+          <label for="sample">Sample</label>
+          <select id="sample"></select>
+        </div>
+        <div class="field">
+          <label for="theme">Theme</label>
+          <select id="theme"></select>
+        </div>
+      </section>
+      <div class="frame" id="preview"></div>
+      <div class="row">
+        <label for="url">File URL</label>
+        <input id="url" type="text" placeholder="https://…" spellcheck="false" />
+      </div>
+
+      <details class="advanced" id="advanced">
+        <summary>Advanced config (JSON)</summary>
+        <textarea id="config" spellcheck="false" aria-label="Viewer config JSON"></textarea>
+        <div class="row">
+          <button class="btn" type="button" id="config-apply">Apply config</button>
+          <span class="error" id="config-error"></span>
+        </div>
+      </details>
+    </main>
+    <script type="module" src="/src/react/main.tsx"></script>
+  </body>
+</html>
