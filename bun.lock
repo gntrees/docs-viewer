@@ -32,8 +32,6 @@
       "version": "0.0.1",
       "dependencies": {
         "@gntrees/docs-viewer": "workspace:*",
-        "marked": "^18.1.0",
-        "shiki": "^4.5.0",
       },
       "devDependencies": {
         "typescript": "^5.6.0",

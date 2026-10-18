@@ -1,6 +1,7 @@
-import type { RenderContext, Renderer } from "../core/types";
+import type { RenderContext, Renderer } from "../types/types";
 import { contentBar } from "../ui/content-bar";
 import { attachMediaInfo } from "../ui/media-info";
+import { mediaMeta } from "./media.meta";
 
 /**
  * Native media renderer (`engine: "native"`) for video and audio.
@@ -20,10 +21,7 @@ import { attachMediaInfo } from "../ui/media-info";
  * from a `blob:` URL, which is seekable. This needs CORS on the file host.
  */
 export const mediaRenderer: Renderer = {
-  id: "media",
-  engine: "native",
-  priority: 12,
-  match: (ctx) => ctx.kind === "video" || ctx.kind === "audio",
+  ...mediaMeta,
   mount(container, initialCtx) {
     let ctx = initialCtx;
     let disposed = false;

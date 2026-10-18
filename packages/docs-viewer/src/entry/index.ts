@@ -23,7 +23,7 @@ export type {
   Theme,
   ViewerConfig,
   VideoViewerConfig,
-} from "../core/types";
+} from "../types/types";
 
 export {
   DEFAULT_CONFIG,
@@ -52,12 +52,13 @@ export { preflight, probe } from "../core/preflight";
 export type { PreflightResult, ProbeResult } from "../core/preflight";
 
 export { RendererRegistry } from "../core/registry";
-export { BASE_CSS, ensureStyles, STYLE_ID } from "../core/styles";
+export { BASE_CSS, ensureStyles, STYLE_ID } from "../style/base";
 
 export {
   createDefaultRegistry,
   googleDocsViewerRenderer,
   googleViewerUrl,
+  highlightCode,
   hlsRenderer,
   imageRenderer,
   MARKUP_MAX_CHARS,
@@ -72,7 +73,7 @@ export {
   shikiRenderer,
   shikiTheme,
   unsupportedRenderer,
-} from "../renderer";
+} from "../renderer/defaults";
 
 export {
   defineDocsViewer,
@@ -82,7 +83,7 @@ export {
   TAG,
 } from "../core/element";
 
-import { ensureStyles } from "../core/styles";
+import { ensureStyles } from "../style/base";
 import { defineDocsViewer } from "../core/element";
 
 // Inject the viewer styles at import time (before any element mounts) so hosts

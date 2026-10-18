@@ -1,7 +1,8 @@
 import { extractArchiveEntry, listArchive, type ArchiveEntry } from "../core/archive/archive";
 import { detect } from "../core/detect";
 import { TAG } from "../core/tag";
-import type { FileKind, Renderer } from "../core/types";
+import type { FileKind, Renderer } from "../types/types";
+import { archiveMeta } from "./archive.meta";
 
 /**
  * Archive renderer (`engine: "archive"`) — a Google-Drive-like browser for ZIP,
@@ -139,10 +140,7 @@ function buildGrid(cells: Array<HTMLElement | string>): {
 }
 
 export const archiveRenderer: Renderer = {
-  id: "archive",
-  engine: "archive",
-  priority: 16,
-  match: (ctx) => ctx.kind === "archive",
+  ...archiveMeta,
   mount(container, ctx) {
     const root = el("div", "gnt-dv-archive");
     container.appendChild(root);

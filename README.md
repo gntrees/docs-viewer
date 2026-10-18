@@ -11,7 +11,7 @@ packages/
 examples/
   html/               Minimal plain-HTML, URL-driven example
 docs/
-  reference/          Vendored third-party docs (research only, not ours)
+  reference/doc/      Vendored third-party docs (research only, not ours)
 ```
 
 `apps/web` aliases the library to its TypeScript source, so it always reflects

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveConfig } from "../core/config";
-import type { RenderContext } from "../core/types";
+import type { RenderContext } from "../types/types";
 import { parseDelimited, parseTable, sniffDelimiter, tableRenderer } from "../renderer/table";
 
 describe("sniffDelimiter", () => {

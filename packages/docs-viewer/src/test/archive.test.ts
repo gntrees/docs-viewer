@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { extractArchiveEntry, listArchive } from "../core/archive/archive";
 import { resolveConfig } from "../core/config";
-import type { RenderContext } from "../core/types";
+import type { RenderContext } from "../types/types";
 import { defineDocsViewer } from "../core/element";
 import { archiveRenderer } from "../renderer/archive";
 import { gzip, makeTar, makeZip } from "./fixtures";

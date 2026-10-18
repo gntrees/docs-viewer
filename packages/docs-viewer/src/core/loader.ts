@@ -1,4 +1,4 @@
-import type { ResolvedConfig } from "./types";
+import type { ResolvedConfig } from "../types/types";
 
 export interface LoadedDocument {
   /** URL to hand to the renderer. */

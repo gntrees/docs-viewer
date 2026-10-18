@@ -1,4 +1,4 @@
-import type { DetectedFile, FileKind } from "./types";
+import type { DetectedFile, FileKind } from "../types/types";
 
 const MIME_BY_EXT: Record<string, string> = {
   pdf: "application/pdf",

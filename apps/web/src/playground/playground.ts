@@ -1,5 +1,6 @@
-import type { Engine, ViewerConfig } from "@gntrees/docs-viewer";
-import { DocsViewerElement, parseQuery, TAG } from "@gntrees/docs-viewer";
+import type { DocsViewerElement, Engine, ViewerConfig } from "@gntrees/docs-viewer";
+import { parseQuery } from "@gntrees/docs-viewer/core/config";
+import { TAG } from "@gntrees/docs-viewer/core/tag";
 import { THEME_CHANGE_EVENT } from "../shared/theme";
 
 const REMOTE_PATTERN = /\.(docx|pptx|xlsx|doc|ppt|xls|odt|odp|ods)$/i;
@@ -562,18 +563,19 @@ function encodeBase64Url(text: string): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-interface Highlighter {
-  codeToHtml(code: string, options: { lang: string; theme: string }): Promise<string>;
-}
+/**
+ * The viewer module is imported on demand: importing it registers the custom
+ * element, and its exported `highlightCode` is the very same lazy Shiki the viewer
+ * uses for code documents. One loader means the landing page never bundles Shiki
+ * twice — and, because it is only reached on activation, never loads it at all
+ * until the playground is actually used.
+ */
+type ViewerModule = typeof import("@gntrees/docs-viewer");
+let viewerModulePromise: Promise<ViewerModule> | null = null;
 
-/** Shiki is imported lazily so it never lands in the home page's first paint. */
-let shikiPromise: Promise<Highlighter> | null = null;
-
-function loadShiki(): Promise<Highlighter> {
-  if (!shikiPromise) {
-    shikiPromise = import("shiki").then((mod) => mod as unknown as Highlighter);
-  }
-  return shikiPromise;
+function loadViewerModule(): Promise<ViewerModule> {
+  if (!viewerModulePromise) viewerModulePromise = import("@gntrees/docs-viewer");
+  return viewerModulePromise;
 }
 
 /** Shiki theme matching the active page theme. */
@@ -761,11 +763,12 @@ export function initPlayground(host: HTMLElement): void {
   const codeSelect = document.getElementById("playground-code-lang") as HTMLSelectElement | null;
   const codeOutput = document.getElementById("playground-code");
 
-  const viewer = document.createElement(TAG) as DocsViewerElement;
-  viewer.style.display = "block";
-  viewer.style.width = "100%";
-  viewer.style.height = "100%";
-  host.appendChild(viewer);
+  // The viewer element (and the library behind it) is created lazily — see
+  // `ensureViewer` — so the landing page does not pay for it before the playground
+  // is on screen.
+  let viewer: DocsViewerElement | null = null;
+  let mountToken = 0;
+  let activated = false;
 
   const setHint = (text: string): void => {
     if (hint) hint.textContent = text;
@@ -773,6 +776,27 @@ export function initPlayground(host: HTMLElement): void {
   const setError = (text: string): void => {
     if (configError) configError.textContent = text;
   };
+
+  /** Surface viewer failures in the playground hint (wired once the element exists). */
+  function onViewerError(event: Event): void {
+    const detail = (event as CustomEvent<{ error?: unknown }>).detail;
+    const message = detail?.error instanceof Error ? detail.error.message : "Unknown error";
+    setHint(`Failed to load: ${message}`);
+  }
+
+  /** Create the viewer on first use, after the library and its custom element load. */
+  async function ensureViewer(): Promise<DocsViewerElement> {
+    if (viewer) return viewer;
+    await loadViewerModule();
+    const element = document.createElement(TAG) as DocsViewerElement;
+    element.style.display = "block";
+    element.style.width = "100%";
+    element.style.height = "100%";
+    element.addEventListener("gnt-error", onViewerError);
+    host.appendChild(element);
+    viewer = element;
+    return element;
+  }
 
   const typeOf = (key: string): TypeGroup | undefined => TYPES.find((g) => g.key === key);
   const langOf = (key: string): CodeLang | undefined => CODE_LANGS.find((l) => l.key === key);
@@ -847,6 +871,14 @@ export function initPlayground(host: HTMLElement): void {
     codeSelect.value = currentFramework;
   }
 
+  /** Render the snippet as plain text, inside a `<pre>` so its line breaks survive. */
+  function showPlainSnippet(snippet: string): void {
+    if (!codeOutput) return;
+    const pre = document.createElement("pre");
+    pre.textContent = snippet;
+    codeOutput.replaceChildren(pre);
+  }
+
   /** Re-highlight the usage snippet for the current config + framework. */
   async function renderCode(): Promise<void> {
     if (!codeOutput) return;
@@ -854,22 +886,19 @@ export function initPlayground(host: HTMLElement): void {
     const framework = FRAMEWORKS.find((entry) => entry.key === currentFramework) ?? FRAMEWORKS[0];
     const snippet = buildSnippet(framework?.key ?? "html", codeConfig(state));
 
-    let shiki: Highlighter;
-    try {
-      shiki = await loadShiki();
-    } catch {
-      if (token === codeToken) codeOutput.textContent = snippet;
+    // Plain text until the playground is used: Shiki (~70 kB gzip) is not worth
+    // loading for a block that sits below the fold on first paint.
+    if (!activated) {
+      showPlainSnippet(snippet);
       return;
     }
 
     try {
-      const html = await shiki.codeToHtml(snippet, {
-        lang: framework?.lang ?? "html",
-        theme: shikiTheme(),
-      });
+      const { highlightCode } = await loadViewerModule();
+      const html = await highlightCode(snippet, framework?.lang ?? "html", shikiTheme());
       if (token === codeToken) codeOutput.innerHTML = html;
     } catch {
-      if (token === codeToken) codeOutput.textContent = snippet;
+      if (token === codeToken) showPlainSnippet(snippet);
     }
   }
 
@@ -1038,9 +1067,10 @@ export function initPlayground(host: HTMLElement): void {
     // overrides it). It is injected at runtime only — never persisted into the URL.
     const entryBase =
       (state.entryBase ?? "").trim() || `${window.location.origin}${import.meta.env.BASE_URL}view/`;
-    viewer.config = source ? { ...state, entryBase } : {};
     syncUrl(syncHistory);
     if (!source) {
+      mountToken += 1; // cancel any in-flight mount
+      if (viewer) viewer.config = {};
       setHint("Pick a type/sample or paste a document URL.");
       return;
     }
@@ -1051,6 +1081,49 @@ export function initPlayground(host: HTMLElement): void {
         ? "Remote viewers fetch the file server-side and must be publicly reachable — localhost will not work."
         : "",
     );
+    // Until the playground is on screen, keep the library out of the page: this is
+    // what drops the viewer core (~28 kB gzip) and Shiki (~82 kB gzip) from the
+    // landing page's first paint.
+    if (!activated) return;
+    void applyViewerConfig({ ...state, entryBase });
+  }
+
+  /** Assign `config` once the library and the custom element are ready. */
+  async function applyViewerConfig(config: ViewerConfig): Promise<void> {
+    const token = ++mountToken;
+    try {
+      const element = await ensureViewer();
+      if (token === mountToken) element.config = config;
+    } catch (error) {
+      setHint(`Failed to load: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Turn on the expensive half (viewer mount + Shiki highlight) the first time the
+   * playground is actually on screen, so the landing page's first paint carries the
+   * static HTML/CSS only.
+   */
+  function activate(): void {
+    if (activated) return;
+    activated = true;
+    render(false);
+    scheduleCode();
+  }
+
+  /** Arm `activate` for the moment the playground enters the viewport. */
+  function observeActivation(target: HTMLElement): void {
+    if (typeof IntersectionObserver === "undefined") {
+      activate();
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        observer.disconnect();
+        activate();
+      }
+    });
+    observer.observe(target);
   }
 
   // -- shortcut controls mutate `state` --------------------------------------
@@ -1154,15 +1227,10 @@ export function initPlayground(host: HTMLElement): void {
   });
   copyButton?.addEventListener("click", () => void copyLink());
 
-  viewer.addEventListener("gnt-error", (event) => {
-    const detail = (event as CustomEvent<{ error?: unknown }>).detail;
-    const message = detail?.error instanceof Error ? detail.error.message : "Unknown error";
-    setHint(`Failed to load: ${message}`);
-  });
-
   populateTypes();
   populateLangs();
   populateFrameworks();
   document.addEventListener(THEME_CHANGE_EVENT, scheduleCode);
   syncAll();
+  observeActivation(host);
 }

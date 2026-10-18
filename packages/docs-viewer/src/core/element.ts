@@ -4,7 +4,7 @@ import { detect, fileNameFromUrl, kindFromMime, normalizeContentType } from "./d
 import { loadDocument, type LoadedDocument } from "./loader";
 import { probe } from "./preflight";
 import { RendererRegistry } from "./registry";
-import { ensureStyles } from "./styles";
+import { ensureStyles } from "../style/base";
 import { TAG } from "./tag";
 import type {
   DetectedFile,
@@ -13,8 +13,8 @@ import type {
   RendererInstance,
   ResolvedConfig,
   ViewerConfig,
-} from "./types";
-import { createDefaultRegistry } from "../renderer";
+} from "../types/types";
+import { createDefaultRegistry } from "../renderer/defaults";
 
 export { TAG };
 
@@ -407,7 +407,7 @@ export class DocsViewerElement extends HTMLElementBase {
         );
       }
 
-      if (!this.#mountNextCandidate(runId)) {
+      if (!(await this.#mountNextCandidate(runId))) {
         throw this.#lastError ?? new Error("All renderers failed to preview this document.");
       }
     } catch (error) {
@@ -439,8 +439,12 @@ export class DocsViewerElement extends HTMLElementBase {
     return candidates.filter((renderer) => renderer.engine === engine);
   }
 
-  /** Mount the current candidate, advancing past any that throw synchronously. */
-  #mountNextCandidate(runId: number): boolean {
+  /**
+   * Mount the current candidate, advancing past any that throw. `renderer.load()`
+   * runs first: a lazily imported engine is resolved while the loading status is
+   * still up, so its DOM is built synchronously once it arrives.
+   */
+  async #mountNextCandidate(runId: number): Promise<boolean> {
     const context = this.#activeContext;
     if (!context) return false;
 
@@ -452,6 +456,8 @@ export class DocsViewerElement extends HTMLElementBase {
       }
       this.#currentRendererId = renderer.id;
       try {
+        await renderer.load?.();
+        if (runId !== this.#runId) return false;
         const instance = renderer.mount(this.#viewportEl, context);
         if (runId !== this.#runId) {
           instance.destroy();
@@ -480,9 +486,9 @@ export class DocsViewerElement extends HTMLElementBase {
     this.#viewportEl.replaceChildren();
     this.#candidateIndex += 1;
 
-    if (!this.#mountNextCandidate(runId)) {
-      this.#reportFailure(runId, this.#lastError);
-    }
+    void this.#mountNextCandidate(runId).then((mounted) => {
+      if (!mounted) this.#reportFailure(runId, this.#lastError);
+    });
   }
 
   #reportFailure(runId: number, error: unknown): void {

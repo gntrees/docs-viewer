@@ -5,7 +5,7 @@ import { h as preactH, render as preactRender } from "preact";
 import { createRoot as createSolidRoot } from "solid-js";
 import { createApp } from "vue";
 import { RendererRegistry } from "../core/registry";
-import type { Renderer } from "../core/types";
+import type { Renderer } from "../types/types";
 import { DocsViewerElement } from "../core/element";
 import * as preactWrapper from "../wrapper/preact";
 import * as reactWrapper from "../wrapper/react";

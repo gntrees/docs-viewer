@@ -253,5 +253,12 @@ export interface Renderer {
   /** Higher is tried first when several renderers match the same context. */
   priority?: number;
   match(ctx: RenderContext): boolean;
+  /**
+   * Resolve whatever `mount` needs before it runs. The built-in renderers use it to
+   * import their own module on demand, so a document only pays for the engine it
+   * actually uses. The element awaits it before mounting, which keeps the loading
+   * status on screen instead of flashing an empty container.
+   */
+  load?(): Promise<void>;
   mount(container: HTMLElement, ctx: RenderContext): RendererInstance;
 }

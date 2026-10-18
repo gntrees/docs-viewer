@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
-import type { RenderContext, ViewerConfig } from "../core/types";
+import type { RenderContext, ViewerConfig } from "../types/types";
 import { defineDocsViewer, DocsViewerElement, TAG } from "../core/element";
 
 export interface DocsViewerProps extends ViewerConfig {

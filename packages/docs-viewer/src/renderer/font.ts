@@ -1,5 +1,6 @@
 import { readFontMeta, type FontMeta } from "../core/truetype";
-import type { Renderer } from "../core/types";
+import type { Renderer } from "../types/types";
+import { fontMeta } from "./font.meta";
 
 /**
  * Font renderer (`engine: "font"`).
@@ -62,10 +63,7 @@ async function loadMeta(url: string, signal: AbortSignal): Promise<FontMeta | nu
 }
 
 export const fontRenderer: Renderer = {
-  id: "font",
-  engine: "font",
-  priority: 16,
-  match: (ctx) => ctx.kind === "font",
+  ...fontMeta,
   mount(container, ctx) {
     const root = document.createElement("div");
     root.className = "gnt-dv-font";

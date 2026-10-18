@@ -1,4 +1,4 @@
-import type { RenderContext, ViewerConfig } from "../core/types";
+import type { RenderContext, ViewerConfig } from "../types/types";
 import { defineDocsViewer, DocsViewerElement, TAG } from "../core/element";
 
 export interface DocsViewerParams extends ViewerConfig {

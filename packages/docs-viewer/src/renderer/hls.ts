@@ -1,9 +1,8 @@
 import type Hls from "hls.js";
-import type { RenderContext, Renderer } from "../core/types";
+import type { RenderContext, Renderer } from "../types/types";
 import { contentBar } from "../ui/content-bar";
 import { attachMediaInfo } from "../ui/media-info";
-
-const HLS_EXT = /^(m3u8|m3u)$/i;
+import { hlsMeta } from "./hls.meta";
 
 let hlsPromise: Promise<typeof Hls> | null = null;
 
@@ -35,10 +34,7 @@ function loadHls(): Promise<typeof Hls> {
  * the `native` engine.
  */
 export const hlsRenderer: Renderer = {
-  id: "hls",
-  engine: "hls",
-  priority: 13,
-  match: (ctx) => ctx.kind === "video" && HLS_EXT.test(ctx.ext),
+  ...hlsMeta,
   mount(container, initialCtx) {
     let ctx = initialCtx;
     let disposed = false;

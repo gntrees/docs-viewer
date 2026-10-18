@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveConfig } from "../core/config";
-import type { RenderContext } from "../core/types";
+import type { RenderContext } from "../types/types";
 import { shikiLangForExt, shikiRenderer, shikiTheme } from "../renderer/shiki";
 
 function context(overrides: Partial<RenderContext> = {}): RenderContext {

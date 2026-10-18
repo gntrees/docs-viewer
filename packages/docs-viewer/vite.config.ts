@@ -4,6 +4,30 @@ import dts from "vite-plugin-dts";
 
 const entry = (path: string): string => fileURLToPath(new URL(path, import.meta.url));
 
+/**
+ * Peer dependencies stay out of the bundle. `shiki/…` subpaths (`shiki/core`,
+ * `shiki/langs/*`, `shiki/themes/*`, `shiki/engine/*`) matter too: without them the
+ * published package would inline Shiki's core instead of leaving it to the app.
+ */
+const EXTERNAL = [
+  "@panzoom/panzoom",
+  "brotli-dec-wasm",
+  "hls.js",
+  "marked",
+  "node-unrar-js",
+  "preact",
+  "preact/hooks",
+  "preact/jsx-runtime",
+  "react",
+  "react-dom",
+  "react/jsx-runtime",
+  "shiki",
+  "svelte",
+  "vue",
+  "solid-js",
+  "solid-js/web",
+];
+
 export default defineConfig({
   plugins: [dts({ include: ["src"], exclude: ["src/test"], tsconfigPath: "./tsconfig.json" })],
   build: {
@@ -24,24 +48,7 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: [
-        "@panzoom/panzoom",
-        "brotli-dec-wasm",
-        "hls.js",
-        "marked",
-        "node-unrar-js",
-        "preact",
-        "preact/hooks",
-        "preact/jsx-runtime",
-        "react",
-        "react-dom",
-        "react/jsx-runtime",
-        "shiki",
-        "svelte",
-        "vue",
-        "solid-js",
-        "solid-js/web",
-      ],
+      external: (id: string): boolean => EXTERNAL.includes(id) || id.startsWith("shiki/"),
     },
   },
 });

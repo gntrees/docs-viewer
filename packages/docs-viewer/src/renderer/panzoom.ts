@@ -1,4 +1,5 @@
-import type { Renderer } from "../core/types";
+import type { Renderer } from "../types/types";
+import { panzoomMeta } from "./panzoom.meta";
 
 /**
  * Image renderer backed by [Panzoom](https://github.com/timmywil/panzoom)
@@ -86,10 +87,7 @@ function makeButton(label: string, content: string): HTMLButtonElement {
 }
 
 export const panzoomRenderer: Renderer = {
-  id: "panzoom",
-  engine: "panzoom",
-  priority: 12,
-  match: (ctx) => ctx.kind === "image",
+  ...panzoomMeta,
   mount(container, ctx) {
     const root = document.createElement("div");
     root.className = "gnt-dv-panzoom";
@@ -104,8 +102,18 @@ export const panzoomRenderer: Renderer = {
     const img = document.createElement("img");
     img.className = "gnt-dv-panzoom-img";
     img.alt = ctx.name;
+    img.decoding = "async";
     img.src = ctx.displayUrl;
     stage.appendChild(img);
+
+    // Mirror the intrinsic size onto the element so the box is stable once decoded
+    // (and after a source change) rather than reflowing on every load.
+    img.addEventListener("load", () => {
+      if (img.naturalWidth > 0) {
+        img.width = img.naturalWidth;
+        img.height = img.naturalHeight;
+      }
+    });
 
     const bar = document.createElement("div");
     bar.className = "gnt-dv-panzoom-bar";

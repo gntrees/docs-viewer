@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveConfig } from "../core/config";
-import type { RenderContext } from "../core/types";
+import type { RenderContext } from "../types/types";
 import { fontRenderer } from "../renderer/font";
 import { makeSfntFont } from "./fixtures";
 

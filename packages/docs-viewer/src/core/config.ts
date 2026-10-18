@@ -1,4 +1,4 @@
-import type { LoaderMode, ResolvedConfig, Theme, ViewerConfig } from "./types";
+import type { LoaderMode, ResolvedConfig, Theme, ViewerConfig } from "../types/types";
 
 export const DEFAULT_OFFICE_ENDPOINT =
   "https://view.officeapps.live.com/op/embed.aspx?src=";

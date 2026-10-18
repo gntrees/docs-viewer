@@ -1,5 +1,5 @@
 import { DEFAULT_GOOGLE_ENDPOINT, DEFAULT_OFFICE_ENDPOINT } from "../core/config";
-import type { FileKind, RenderContext, Renderer } from "../core/types";
+import type { FileKind, RenderContext, Renderer } from "../types/types";
 
 /** How long to wait for a remote viewer before handing off to the next engine. */
 export const REMOTE_FALLBACK_TIMEOUT_MS = 8000;

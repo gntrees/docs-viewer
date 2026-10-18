@@ -1,5 +1,5 @@
 import { parseQuery } from "../core/config";
-import type { ViewerConfig } from "../core/types";
+import type { ViewerConfig } from "../types/types";
 import { defineDocsViewer, DocsViewerElement, TAG } from "../core/element";
 
 export interface StandaloneOptions {

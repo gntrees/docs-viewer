@@ -1,4 +1,4 @@
-import type { Renderer } from "../core/types";
+import type { Renderer } from "../types/types";
 
 /** Last-resort renderer: a message and a download link. Never fails to match. */
 export const unsupportedRenderer: Renderer = {

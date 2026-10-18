@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { RendererRegistry } from "../core/registry";
-import type { RenderContext, Renderer } from "../core/types";
+import { lazyRenderer, RendererRegistry } from "../core/registry";
+import type { RenderContext, Renderer } from "../types/types";
 import { defineDocsViewer, DocsViewerElement, TAG } from "../core/element";
 
 defineDocsViewer();
@@ -51,6 +51,39 @@ function create(config?: Record<string, unknown>, renderer: Renderer = fakeRende
 afterEach(() => {
   document.body.replaceChildren();
   vi.unstubAllGlobals();
+});
+
+describe("lazy renderers", () => {
+  it("loads its implementation before mounting, so the DOM lands in one pass", async () => {
+    const load = vi.fn(async () => fakeRenderer("lazy"));
+    const element = create(
+      undefined,
+      lazyRenderer({ id: "lazy", priority: 1000, match: () => true, load }),
+    );
+    element.config = { source: "/a.pdf" };
+    await flush();
+
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(element.querySelector('[data-testid="fake-renderer"]')).not.toBeNull();
+  });
+
+  it("falls back to the next renderer when the implementation cannot load", async () => {
+    const broken = lazyRenderer({
+      id: "broken",
+      priority: 1000,
+      match: () => true,
+      load: async () => {
+        throw new Error("module missing");
+      },
+    });
+    const element = document.createElement(TAG) as DocsViewerElement;
+    element.registry = new RendererRegistry().register(broken).register(fakeRenderer("fallback"));
+    document.body.appendChild(element);
+    element.config = { source: "/a.pdf" };
+    await flush();
+
+    expect(element.querySelector('[data-testid="fake-renderer"]')).not.toBeNull();
+  });
 });
 
 describe("DocsViewerElement", () => {

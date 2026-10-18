@@ -1,4 +1,4 @@
-import type { RenderContext, Renderer, ResolvedConfig } from "../core/types";
+import type { RenderContext, Renderer, ResolvedConfig } from "../types/types";
 import { contentBar, type ViewMode } from "../ui/content-bar";
 import { highlightCode, shikiLangForExt, shikiTheme } from "./shiki";
 

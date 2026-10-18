@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolveConfig } from "../core/config";
-import type { RenderContext } from "../core/types";
+import type { RenderContext } from "../types/types";
 import {
   googleDocsViewerRenderer,
   googleViewerUrl,

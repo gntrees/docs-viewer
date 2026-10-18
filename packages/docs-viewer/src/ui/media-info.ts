@@ -1,4 +1,4 @@
-import type { RenderContext } from "../core/types";
+import type { RenderContext } from "../types/types";
 
 /** Mutable holder so the info line can refresh with the latest context. */
 export interface MediaInfoContext {

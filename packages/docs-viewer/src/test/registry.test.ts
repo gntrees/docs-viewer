@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { RendererRegistry } from "../core/registry";
-import type { RenderContext, Renderer } from "../core/types";
-import { createDefaultRegistry } from "../renderer";
+import type { RenderContext, Renderer } from "../types/types";
+import { createDefaultRegistry } from "../renderer/defaults";
+import { archiveRenderer } from "../renderer/archive";
+import { fontRenderer } from "../renderer/font";
+import { hlsRenderer } from "../renderer/hls";
+import { mediaRenderer } from "../renderer/media";
+import { panzoomRenderer } from "../renderer/panzoom";
 
 const context = {
   displayUrl: "u",
@@ -111,5 +116,38 @@ describe("default registry", () => {
     expect(registry.candidates(remoteRelative).map((renderer) => renderer.id)).toEqual([
       "unsupported",
     ]);
+  });
+});
+
+describe("lazy built-ins", () => {
+  const implementations = [
+    ["archive", archiveRenderer],
+    ["font", fontRenderer],
+    ["hls", hlsRenderer],
+    ["media", mediaRenderer],
+    ["panzoom", panzoomRenderer],
+  ] as const;
+
+  it("advertises its implementation's metadata without importing it", () => {
+    const registry = createDefaultRegistry();
+    for (const [id, implementation] of implementations) {
+      const lazy = registry.list().find((renderer) => renderer.id === id);
+      expect(lazy).toBeDefined();
+      expect(lazy?.engine).toBe(implementation.engine);
+      expect(lazy?.priority).toBe(implementation.priority);
+      // Sharing the matcher function is what keeps the two in sync by construction:
+      // duplicating the metadata instead would fail here.
+      expect(lazy?.match).toBe(implementation.match);
+    }
+  });
+
+  it("loads its implementation on demand, idempotently", async () => {
+    const registry = createDefaultRegistry();
+    for (const [id] of implementations) {
+      const lazy = registry.list().find((renderer) => renderer.id === id);
+      expect(typeof lazy?.load).toBe("function");
+      await lazy?.load?.();
+      await lazy?.load?.();
+    }
   });
 });

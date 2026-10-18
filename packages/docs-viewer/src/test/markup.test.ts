@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveConfig } from "../core/config";
-import type { RenderContext } from "../core/types";
+import type { RenderContext } from "../types/types";
 import { markupRenderer } from "../renderer/markup";
 
 function context(overrides: Partial<RenderContext> = {}): RenderContext {

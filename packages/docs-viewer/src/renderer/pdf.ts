@@ -1,4 +1,4 @@
-import type { Renderer } from "../core/types";
+import type { Renderer } from "../types/types";
 
 /**
  * PDF rendering via the browser's built-in PDF viewer in an `<iframe>`.

@@ -118,6 +118,10 @@ export default defineConfig(({ command, isPreview }) => ({
   },
   build: {
     outDir: "dist",
+    // Every page pulls its module graph in full at load; the polyfill for browsers
+    // without `<link rel="modulepreload">` is one request we do not need (the
+    // preload hints stay — those browsers simply ignore them).
+    modulePreload: { polyfill: false },
     rollupOptions: {
       input: {
         home: r("./index.html"),
