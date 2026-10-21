@@ -1,0 +1,1 @@
+/* empty css              */import{f as r,b as i}from"./index-CqDUh_3-.js";import"./tag-BFVlTKPC.js";const e=new URLSearchParams(window.location.search),o=e.get("file")??e.get("url")??e.get("src");o&&(document.title=`${r(o)} — gntrees docs-viewer`);const t=document.getElementById("viewer");t&&i(t,window.location.search);

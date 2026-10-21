@@ -1,0 +1,29 @@
+---
+title: "Overview"
+description: "A map of the documentation — every section is a standalone markdown file."
+---
+
+# Overview
+
+**@gntrees/docs-viewer** is a framework-agnostic document viewer: a Web Component (`<gnt-docs-viewer>`) that renders PDF, Office, images, video and code, choosing a renderer automatically and falling back when one fails. Use it from plain HTML, React, Preact, Vue, Svelte or Solid — or mount it straight from a URL with a single `?file=…` parameter.
+
+This page is the entry point for the reference. Each entry links to its section; click ⤓ to download that section as a standalone markdown file.
+
+- [Getting started](https://gntrees.github.io/docs-viewer/docs/#getting-started) — Install the package and mount your first viewer in plain HTML. [⤓](https://gntrees.github.io/docs-viewer/docs/getting-started.md)
+- [Plain JS](https://gntrees.github.io/docs-viewer/docs/#plain-js) — Use the Web Component from vanilla JavaScript with attributes or the config property. [⤓](https://gntrees.github.io/docs-viewer/docs/plain-js.md)
+- [React](https://gntrees.github.io/docs-viewer/docs/#react) — Drop the React wrapper into a component tree with props and event callbacks. [⤓](https://gntrees.github.io/docs-viewer/docs/react.md)
+- [Preact](https://gntrees.github.io/docs-viewer/docs/#preact) — Use the Preact wrapper with the same props API as the React wrapper. [⤓](https://gntrees.github.io/docs-viewer/docs/preact.md)
+- [Vue](https://gntrees.github.io/docs-viewer/docs/#vue) — Use the Vue wrapper with a single config object and ready/error events. [⤓](https://gntrees.github.io/docs-viewer/docs/vue.md)
+- [Solid](https://gntrees.github.io/docs-viewer/docs/#solid) — Use the Solid wrapper, which accepts config as props. [⤓](https://gntrees.github.io/docs-viewer/docs/solid.md)
+- [Svelte](https://gntrees.github.io/docs-viewer/docs/#svelte) — Mount the viewer from Svelte with an action — no component compilation needed. [⤓](https://gntrees.github.io/docs-viewer/docs/svelte.md)
+- [URL mode](https://gntrees.github.io/docs-viewer/docs/#url-mode) — Render a document straight from URL query parameters, with no application code. [⤓](https://gntrees.github.io/docs-viewer/docs/url-mode.md)
+- [Configuration](https://gntrees.github.io/docs-viewer/docs/#configuration) — Every configuration field, its default, the merge order and the ?config= JSON escape hatch. [⤓](https://gntrees.github.io/docs-viewer/docs/configuration.md)
+- [Renderers](https://gntrees.github.io/docs-viewer/docs/#renderers) — How each file kind is rendered, code language coverage and the loading/CORS modes. [⤓](https://gntrees.github.io/docs-viewer/docs/renderers.md)
+- [Engine & fallback](https://gntrees.github.io/docs-viewer/docs/#engine) — How auto picks a renderer with fallback, and how forcing a specific engine disables it. [⤓](https://gntrees.github.io/docs-viewer/docs/engine.md)
+- [Toolbar](https://gntrees.github.io/docs-viewer/docs/#toolbar) — There is no built-in toolbar — drive the viewer from your own UI via its methods. [⤓](https://gntrees.github.io/docs-viewer/docs/toolbar.md)
+- [Office & remote viewers](https://gntrees.github.io/docs-viewer/docs/#office) — Preview docx/xlsx/pptx through third-party viewers, and their detection limits. [⤓](https://gntrees.github.io/docs-viewer/docs/office.md)
+- [Custom renderer](https://gntrees.github.io/docs-viewer/docs/#custom-renderer) — Register your own renderer for a file kind or format. [⤓](https://gntrees.github.io/docs-viewer/docs/custom-renderer.md)
+- [Theming](https://gntrees.github.io/docs-viewer/docs/#theming) — Customize the viewer with CSS custom properties. [⤓](https://gntrees.github.io/docs-viewer/docs/theming.md)
+- [Events](https://gntrees.github.io/docs-viewer/docs/#events) — Listen to gnt-ready, gnt-error and gnt-config-change. [⤓](https://gntrees.github.io/docs-viewer/docs/events.md)
+
+Prefer a single file? [Download](https://gntrees.github.io/docs-viewer/docs/docs.md) — the whole reference in one markdown file.

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
+  <rect width="320" height="180" fill="#eef2ff" />
+  <circle cx="90" cy="90" r="48" fill="#6366f1" />
+  <circle cx="210" cy="90" r="48" fill="#a855f7" />
+  <text x="160" y="166" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#18181b">
+    panzoom sample
+  </text>
+</svg>

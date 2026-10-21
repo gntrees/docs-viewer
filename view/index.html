@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/docs-viewer/logo.svg" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash of the wrong theme.
+      try {
+        var t = localStorage.getItem("gnt-docs-viewer-theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <title>Viewer — gntrees docs-viewer</title>
+    <script type="module" crossorigin src="/docs-viewer/assets/view-CbCeTRjp.js"></script>
+    <link rel="modulepreload" crossorigin href="/docs-viewer/assets/tag-BFVlTKPC.js">
+    <link rel="modulepreload" crossorigin href="/docs-viewer/assets/index-CqDUh_3-.js">
+    <link rel="stylesheet" crossorigin href="/docs-viewer/assets/style-BoGo0kji.css">
+  </head>
+  <body>
+    <!-- The component is rendered directly here — no topbar, no iframe wrapper. -->
+    <main class="viewer-main">
+      <div class="viewer-mount" id="viewer"></div>
+    </main>
+
+  </body>
+</html>
